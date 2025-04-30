@@ -1,0 +1,89 @@
+{
+  "name": "open_spiel_wrapper",
+  "title": "OpenSpiel Game Wrapper",
+  "description": "A generic Kaggle environment for playing OpenSpiel games.",
+  "version": "0.1.0",
+  "agents": [2],
+  "configuration": {
+    "episodeSteps": {
+      "description": "Maximum number of steps (actions taken) in an episode.",
+      "type": "integer",
+      "default": 100
+    },
+    "actTimeout": {
+      "description": "Maximum runtime (seconds) to obtain an action from an agent.",
+      "type": "number",
+      "default": 5
+    },
+    "openSpielGameName": {
+      "description": "The short_name of the OpenSpiel game to load (e.g., 'tic_tac_toe', 'chess'). This name must be registered with OpenSpiel.",
+      "type": "string",
+      "default": "tic_tac_toe"
+    },
+    "openSpielGameSettings": {
+      "description": "Optional game-specific settings as a JSON object (string-to-string key-value pairs), passed to pyspiel.load_game(name, params). Example: {\"board_size\": \"19\"} for Go.",
+      "type": "object",
+      "default": {}
+    }
+  },
+  "reward": {
+    "description": "Reward for the agent. Interpretation depends on the OpenSpiel game (e.g., for zero-sum games: 1 for win, -1 for loss, 0 for draw/ongoing). The interpreter will provide the agent's specific reward.",
+    "type": ["number", "null"],
+    "default": 0
+  },
+  "observation": {
+    "openSpielGameName": {
+        "description": "The short_name of the OpenSpiel game being played. Useful for agents to adapt to game-specifics.",
+        "type": "string",
+        "shared": true
+    },
+    "raw_observation_string": {
+        "description": "String representation of the OpenSpiel state (from state.to_string()). Useful for debugging or agents familiar with OpenSpiel string parsing.",
+        "type": "string",
+        "shared": true
+    },
+    "observation_tensor": {
+        "description": "Flattened observation tensor from OpenSpiel, from the perspective of this agent (state.observation_tensor(player_id)). Length and interpretation vary by game.",
+        "type": "array",
+        "items": { "type": "number" },
+        "shared": false
+    },
+    "legal_actions": {
+        "description": "List of legal action IDs for this agent if it's their turn. Empty if not their turn or if the game has ended.",
+        "type": "array",
+        "items": { "type": "integer" },
+        "shared": false
+    },
+    "current_player_id": {
+        "description": "The ID of the player whose turn it is in OpenSpiel (e.g., 0 or 1 for a 2-player game). All agents see this.",
+        "type": "integer",
+        "shared": true
+    },
+    "is_terminal": {
+        "description": "Boolean indicating if the OpenSpiel game has ended. All agents see this.",
+        "type": "boolean",
+        "shared": true
+    },
+    "player_id": {
+        "description": "The player ID (e.g., 0, 1) assigned to this agent in the OpenSpiel game. This helps the agent identify itself.",
+        "type": "integer",
+        "shared": false,
+        "defaults": [0, 1]
+    },
+    "remainingOverageTime": {
+        "description": "Standard Kaggle field: Total remaining banked time (seconds) for this agent.",
+        "type": "number",
+        "shared": false,
+        "default": 60
+    }
+  },
+  "action": {
+    "description": "Integer action ID to be played in the OpenSpiel game. This should be one of the values from the 'legal_actions' list in the agent's current observation.",
+    "type": "integer",
+    "default": -1
+  },
+  "status": {
+    "description": "Standard Kaggle agent status. Will be set by the interpreter based on OpenSpiel game state (e.g., 'ACTIVE', 'INACTIVE', 'DONE').",
+    "defaults": ["ACTIVE", "INACTIVE"]
+  }
+}
