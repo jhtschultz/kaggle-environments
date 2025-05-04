@@ -7,6 +7,7 @@ from os import path
 import sys
 import os
 import copy # For deep copying the template
+import random
 
 # --- Path Setup and Debugging ---
 print(f"--- EXECUTING: open_spiel.py ---")
@@ -351,9 +352,63 @@ def renderer(state_history_entry, env):
     except Exception as e: print(f"--- ERROR renderer ({env.name}): Fallback failed: {e} ---"); return f"Error rendering {env.name}"
 
 def html_renderer():
-    """Provides the HTML/JS for the interactive replay viewer."""
-    # Adjust JS to get game name from runtime config if possible
-    return """<script> function renderer(context){const{parent,environment,step}=context;parent.innerHTML='';const d=document.createElement("div");d.style.fontFamily="monospace";d.style.whiteSpace="pre";d.style.lineHeight="1.2";d.style.padding="10px";d.style.border="1px solid #ccc";d.style.backgroundColor="#f9f9f9";d.style.maxWidth="800px";let t='OpenSpiel Game',g='Unknown',s='N/A';if(environment&&environment.specification){t=environment.specification.title||t;const a=environment.specification.agents;s=Array.isArray(a)?a.join(', '):'N/A';if(environment.configuration&&environment.configuration.openSpielGameName){g=environment.configuration.openSpielGameName}}let n="Waiting for state...",i=`Step: ${step}`,r=[],l="Initial State";if(environment&&environment.steps&&step>0&&environment.steps[step-1]){const p=environment.steps[step-1].map((e,a)=>`P${a}: ${e.action!==undefined?e.action:'?'}`);p.length>0&&(l=`Actions leading to this state: ${p.join('; ')}`)}if(environment&&environment.steps&&environment.steps[step]){const c=environment.steps[step];c[0]&&c[0].observation&&c[0].observation.raw_observation_string!==undefined?n=String(c[0].observation.raw_observation_string||'').replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/\\n/g,'<br>'):n="State data not available in observation.";c.forEach((e,a)=>{let o=e.status||'UNKNOWN',u=e.reward===null?'null':e.reward!==undefined?e.reward.toFixed(2):'N/A';r.push(`P${a}: ${o} (Rwd: ${u})`)});i+=` (${r.join(', ')})`}else step===0&&(n="Initial state");d.innerHTML=`<h3 style="margin-top:0; margin-bottom:5px;">${t}</h3><p style="font-size:.9em; color:#555; margin-top:0; margin-bottom:10px;">Game: ${g} | Agents in Spec: ${s}</p><p style="margin-bottom:5px;">${i}</p><p style="font-size:.8em; color:#777; margin-top:0; margin-bottom:10px;">${l}</p><div style="margin-top:10px; border-top:1px solid #eee; padding-top:10px;"><b>Game State:</b></div><div style="background-color:#fff; border:1px solid #eee; padding:5px; margin-top:5px; max-height:400px; overflow-y:auto;">${n}</div>`;parent.appendChild(d)}</script>"""
+    """Provides the simplest possible HTML/JS renderer for OpenSpiel text observations."""
+    return """
+function renderer(context) {
+    const { parent, environment, step } = context;
+    parent.innerHTML = ''; // Clear previous rendering
+
+    // Get the current step's data
+    const currentStepData = environment.steps[step];
+    let obsString = "Observation not available for this step.";
+
+    // Try to get the raw observation string from the first agent
+    if (currentStepData && currentStepData[0] && currentStepData[0].observation && currentStepData[0].observation.raw_observation_string !== undefined) {
+        obsString = currentStepData[0].observation.raw_observation_string;
+    } else if (step === 0 && environment.steps[0] && environment.steps[0][0] && environment.steps[0][0].observation && environment.steps[0][0].observation.raw_observation_string !== undefined) {
+        // Fallback for initial state if current step data is missing
+        obsString = environment.steps[0][0].observation.raw_observation_string;
+    }
+
+    // Create a <pre> element to preserve formatting
+    const pre = document.createElement("pre");
+    pre.style.fontFamily = "monospace"; // Ensure monospace font
+    pre.style.margin = "10px";        // Add some padding
+    pre.style.border = "1px solid #ccc";
+    pre.style.padding = "5px";
+    pre.style.backgroundColor = "#f0f0f0";
+
+    // Set the text content (safer than innerHTML for plain text)
+    pre.textContent = `Step: ${step}\\n\\n${obsString}`; // Add step number for context
+
+    parent.appendChild(pre);
+}
+"""
+
+
+# --- Agents ---
+def random_agent(observation, configuration):
+    """
+    A built-in random agent specifically for OpenSpiel environments.
+    Chooses randomly from the 'legal_actions' provided in the observation.
+    """
+    legal_actions = observation.get("legal_actions") # Get the list of legal actions
+
+    # Check if legal_actions is a non-empty list
+    if isinstance(legal_actions, list) and legal_actions:
+        action = random.choice(legal_actions)
+        # Optional: Add debug print if needed
+        # print(f"DEBUG (open_spiel random_agent): Choosing action {action} from {legal_actions}")
+        return int(action) # Ensure the action is an integer
+    else:
+        # Fallback if no legal actions are provided or the list is empty.
+        # This might happen if the agent is called inappropriately (e.g., terminal state)
+        # or if there's an issue generating legal actions in the interpreter.
+        # Returning 0 is a safe default as action IDs are typically non-negative integers.
+        print(f"WARNING (open_spiel random_agent): No valid legal_actions found in observation: {legal_actions}. Returning default action 0.")
+        return 0
+
+agents = {"random": random_agent}
 
 
 # --- Dynamic Environment Generation ---
@@ -395,6 +450,7 @@ try:
                 "interpreter": interpreter,
                 "renderer": renderer,
                 "html_renderer": html_renderer,
+                "agents": agents,
             }
             successful_loads += 1
         except pyspiel.SpielError as e: print(f"--- INFO Skipping '{short_name}': Load failed (needs config?). Error: {e} ---"); skipped_loads += 1; continue

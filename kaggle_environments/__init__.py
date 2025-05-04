@@ -34,6 +34,7 @@ def _register_env_details(env_name, details_dict):
          # The dictionary passed to register NO LONGER includes the top-level 'agents' key.
          # The agent count info is inside details_dict["specification"]["agents"]
          register(env_name, {
+             "agents": details_dict.get("agents"),
              "html_renderer": details_dict.get("html_renderer"), # Optional
              "interpreter": details_dict.get("interpreter"),
              "renderer": details_dict.get("renderer"),
@@ -94,6 +95,7 @@ for name in CORE_IMPORT_ENVS:
             env = import_module(env_module_path, __name__)
             # Pass the details extracted from the standard env module
             if _register_env_details(name, {
+                "agents": getattr(env, "agents", []),
                 "specification": getattr(env, "specification", None),
                 "interpreter": getattr(env, "interpreter", None),
                 "renderer": getattr(env, "renderer", None),
