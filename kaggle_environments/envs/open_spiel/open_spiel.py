@@ -3,50 +3,18 @@
 # (Your license header)
 
 import json
-from os import path
-import sys
 import os
-import copy # For deep copying the template
+import copy
 import random
+import sys
+import numpy as np
 
-# --- Path Setup and Debugging ---
-print(f"--- EXECUTING: open_spiel.py ---")
-# print(f"--- CWD in open_spiel.py: {os.getcwd()} ---") # Optional debug
-# print(f"--- LD_LIBRARY_PATH in open_spiel.py: {os.environ.get('LD_LIBRARY_PATH')} ---") # Optional debug
-# print(f"--- Initial sys.path in open_spiel.py: ---") # Optional debug
-# for p in sys.path: print(f"    {p}") # Optional debug
-# print(f"--- End of Initial sys.path ---") # Optional debug
-
-# Add pyspiel build directory to Python path
-pyspiel_dir = os.environ.get("PYSPIEL_BUILD_DIR", "/opt/open_spiel/build/python")
-if pyspiel_dir not in sys.path:
-    print(f"--- Adding to sys.path for pyspiel: {pyspiel_dir} ---")
-    sys.path.insert(0, pyspiel_dir)
-
-# Check LD_LIBRARY_PATH (informational)
-open_spiel_lib_dir = os.environ.get("OPEN_SPIEL_LIB_DIR", "/opt/open_spiel/build/lib")
-current_ld_path = os.environ.get('LD_LIBRARY_PATH', '')
-if open_spiel_lib_dir and open_spiel_lib_dir not in current_ld_path.split(os.pathsep):
-    print(f"--- INFO: Consider adding {open_spiel_lib_dir} to LD_LIBRARY_PATH if needed ---")
-
-# --- Import pyspiel ---
-try:
-    print(f"--- Attempting to import pyspiel in open_spiel.py ---")
-    import pyspiel
-    print("--- Successfully imported pyspiel in open_spiel.py ---")
-except Exception as e:
-    print(f"--- ERROR importing pyspiel: {e} ---")
-    raise ImportError(f"Failed to import pyspiel: {e}")
-
+import pyspiel
 
 # --- Base Kaggle Environment Specification Template (as Python Dict) ---
-# This template defines the structure that will be placed under the top-level
-# 'specification' key, adhering strictly to the base_schema.json provided.
-# It aims to define ONLY what's necessary and let core.py handle standard parts.
 DEFAULT_ACT_TIMEOUT = 5.0 # Keep for interpreter fallback
 MAX_LEN_THRESHOLD = 5000 # Used for description only
 DEFAULT_EPISODE_STEPS = 1000 # Fallback max steps if game max_len is 0 or very large
-
 BASE_SPEC_TEMPLATE = {
   "name": "PLACEHOLDER_NAME",
   "title": "PLACEHOLDER_TITLE",
@@ -75,6 +43,11 @@ BASE_SPEC_TEMPLATE = {
       "description": "The short_name of the OpenSpiel game to load. This is fixed for this environment.",
       "type": "string",
       "default": "PLACEHOLDER_GAME_SHORT_NAME" # Set during generation
+    },
+    "randomSeed": {
+      "description": "Seed for the random number generator used for chance events. If null/absent, a seed is generated.",
+      "type": ["integer", "null"],
+      "default": None 
     }
     # NOTE: openSpielGameSettings is intentionally omitted here. It's meant to be a runtime override.
   },
@@ -129,18 +102,23 @@ BASE_SPEC_TEMPLATE = {
 }
 
 
-# --- Agent Cache and Game Loading Helper ---
 _OS_GAME_CACHE = {}
 def _get_open_spiel_game(env_config: dict) -> pyspiel.Game:
-    game_name=env_config.get("openSpielGameName","tic_tac_toe"); game_settings_dict=env_config.get("openSpielGameSettings",{}); game_settings_tuple=tuple(sorted(game_settings_dict.items())); cache_key=(game_name,game_settings_tuple)
-    if cache_key in _OS_GAME_CACHE: return _OS_GAME_CACHE[cache_key]
+    game_name = env_config.get("openSpielGameName", "tic_tac_toe")
+    game_settings_dict = env_config.get("openSpielGameSettings", {})
+    game_settings_tuple = tuple(sorted(game_settings_dict.items()))
+    cache_key= (game_name,game_settings_tuple)
+    if cache_key in _OS_GAME_CACHE:
+        return _OS_GAME_CACHE[cache_key]
     try:
-        game_params={str(k):str(v) for k,v in game_settings_dict.items()}
-        game=pyspiel.load_game(game_name,game_params); _OS_GAME_CACHE[cache_key]=game
+        game_params = {str(k): str(v) for k, v in game_settings_dict.items()}
+        game=pyspiel.load_game(game_name, game_params)
+        _OS_GAME_CACHE[cache_key]=game
         return game
-    except Exception as e: print(f"*** ERROR (_get_open_spiel_game): Failed loading '{game_name}': {e} ***"); raise
+    except Exception as e:
+        print(f"*** ERROR (_get_open_spiel_game): Failed loading '{game_name}': {e} ***")
+        raise
 
-# --- State Reconstruction Helper ---
 def _reconstruct_os_state(game: pyspiel.Game, kaggle_steps_history: list, num_expected_agents: int) -> pyspiel.State:
     # kaggle_steps_history[0] is the initial dummy state from core.py
     # kaggle_steps_history[1] is the list returned by interpreter after step 0
@@ -213,21 +191,21 @@ def interpreter(state, env):
 
     if len(state) != num_agents: raise ValueError(f"Runtime agent count {len(state)} != game players {num_agents} for '{game_name}'.")
 
-    os_current_state = _reconstruct_os_state(game, env.steps, num_agents)
-    os_state_after = os_current_state.clone()
+    os_state = _reconstruct_os_state(game, env.steps, num_agents)
     applied_actions = [None] * num_agents # Track successfully applied actions for storing in info
 
     # --- ADDED DEBUG: State *after* chance nodes, *before* action processing ---
     if env.debug:
-        print(f"--- DEBUG INTERPRETER ({env.name}): State post-chance, pre-action. IsTerminal: {os_state_after.is_terminal()}, CurrentPlayer: {os_state_after.current_player()}, IsChance: {os_state_after.is_chance_node()} ---")
-        print(f"--- State String:\n{os_state_after.to_string()}\n--- End State String ---")
-    if not os_state_after.is_terminal():
+        print(f"--- DEBUG INTERPRETER ({env.name}): State post-chance, pre-action. IsTerminal: {os_state.is_terminal()}, CurrentPlayer: {os_state.current_player()}, IsChance: {os_state.is_chance_node()} ---")
+        print(f"--- State String:\n{os_state.to_string()}\n--- End State String ---")
+
+    if not os_state.is_terminal():
         is_initial_reset_call = (len(env.steps) == 1) # Check if this is the first interpreter call during reset
-        active_player = os_state_after.current_player()
+        active_player = os_state.current_player()
 
         # --- Step 1: Process Submitted Player Action ---
         # Only apply if not initial reset and the current state is a player node (not chance/terminal)
-        if not is_initial_reset_call and not os_state_after.is_chance_node():
+        if not is_initial_reset_call and not os_state.is_chance_node():
             if active_player == pyspiel.PlayerId.SIMULTANEOUS:
                 # TODO: Refine simultaneous game handling if needed.
                 # Need to know how the specific OpenSpiel game expects actions (list length, handling of None/invalid).
@@ -235,7 +213,7 @@ def interpreter(state, env):
                 try:
                     # Assuming apply_actions handles None or requires a specific invalid action constant.
                     # actions_to_apply = [a if a is not None else pyspiel.INVALID_ACTION for a in actions_submitted] # Example
-                    os_state_after.apply_actions(actions_submitted) # Or actions_to_apply
+                    os_state.apply_actions(actions_submitted) # Or actions_to_apply
                     # Store submitted actions. Status might need update based on apply_actions result/exceptions.
                     applied_actions = actions_submitted
                 except Exception as e:
@@ -245,10 +223,10 @@ def interpreter(state, env):
             elif 0 <= active_player < num_agents:
                 action = state[active_player].action # Action submitted by the agent for this step
                 if action is not None:
-                    legal = os_state_after.legal_actions()
+                    legal = os_state.legal_actions()
                     if action in legal:
                         try:
-                            os_state_after.apply_action(action)
+                            os_state.apply_action(action)
                             applied_actions[active_player] = action # Store successfully applied action
                         except Exception as e:
                             print(f"*** ERROR interpreter ({env.name}): apply_action failed for P{active_player} action {action}: {e} ***")
@@ -261,15 +239,15 @@ def interpreter(state, env):
                 # else: action is None (e.g., agent timed out or returned None), state doesn't change for this player. Status handled by core.py?
 
     # --- Step 2: Handle Chance Nodes AFTER player action (if any) ---
-    while os_state_after.is_chance_node():
-        outcomes = os_state_after.chance_outcomes()
-        if outcomes: os_state_after.apply_action(outcomes[0][0]) # Apply first outcome deterministically
+    while os_state.is_chance_node():
+        outcomes = os_state.chance_outcomes()
+        if outcomes: os_state.apply_action(outcomes[0][0]) # Apply first outcome deterministically
         else: print(f"--- WARNING interpreter ({env.name}): Chance node with no outcomes ---"); break
 
-    # --- Step 3: Generate next states for Kaggle based on the final os_state_after ---
-    new_states = []; is_terminal = os_state_after.is_terminal()
-    returns = os_state_after.returns() if is_terminal else [0.0] * num_agents
-    next_player = os_state_after.current_player()
+    # --- Step 3: Generate next states for Kaggle based on the final os_state ---
+    new_states = []; is_terminal = os_state.is_terminal()
+    returns = os_state.returns() if is_terminal else [0.0] * num_agents
+    next_player = os_state.current_player()
     # Use core.py's configuration defaults if available, else fallback
     act_timeout_default = env.configuration.get("actTimeout", DEFAULT_ACT_TIMEOUT)
 
@@ -309,24 +287,24 @@ def interpreter(state, env):
             "remainingOverageTime": state[i].observation.get("remainingOverageTime", act_timeout_default * 2), # Example fallback for overage
             "step": len(env.steps) # Current step index
         }
-        obs_dict["raw_observation_string"] = os_state_after.to_string()
+        obs_dict["raw_observation_string"] = os_state.to_string()
         # TODO
-        # obs_dict["observation_tensor"] = [float(x) for x in os_state_after.observation_tensor(i)]
+        # obs_dict["observation_tensor"] = [float(x) for x in os_state.observation_tensor(i)]
         if status == "ACTIVE":
-             try:
-                 if env.debug:
-                     print(f"--- DEBUG INTERPRETER ({env.name}): P{i} ACTIVE. About to call legal_actions. State type: {type(os_state_after)}, IsTerminal: {os_state_after.is_terminal()}, CurrentPlayer: {os_state_after.current_player()}, IsChance: {os_state_after.is_chance_node()} ---")
-                     print(f"--- State String:\n{os_state_after.to_string()}\n--- End State String ---")
-                 if not os_state_after.is_chance_node():
-                     legal_acts = os_state_after.legal_actions(i)
-                     print(f"--- DEBUG INTERPRETER ({env.name}): P{i} legal_actions returned: {legal_acts} (Type: {type(legal_acts)}) ---")
-                     obs_dict["legal_actions"] = legal_acts
-                     # --- ADDED DEBUG: Value in obs_dict *after* assignment ---
-                     if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] set to: {obs_dict['legal_actions']} ---")
-             except Exception as e_legal:
-                 print(f"--- WARNING interpreter ({env.name}): Exception getting legal_actions for P{i} (Status: {status}): {type(e_legal).__name__}: {e_legal} ---")
-                 if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] remains default [] due to exception. ---")
-                 pass # Leave empty if error
+            try:
+                if env.debug:
+                    print(f"--- DEBUG INTERPRETER ({env.name}): P{i} ACTIVE. About to call legal_actions. State type: {type(os_state)}, IsTerminal: {os_state.is_terminal()}, CurrentPlayer: {os_state.current_player()}, IsChance: {os_state.is_chance_node()} ---")
+                    print(f"--- State String:\n{os_state.to_string()}\n--- End State String ---")
+                if not os_state.is_chance_node():
+                    legal_acts = os_state.legal_actions(i)
+                    print(f"--- DEBUG INTERPRETER ({env.name}): P{i} legal_actions returned: {legal_acts} (Type: {type(legal_acts)}) ---")
+                    obs_dict["legal_actions"] = legal_acts
+                    # --- ADDED DEBUG: Value in obs_dict *after* assignment ---
+                    if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] set to: {obs_dict['legal_actions']} ---")
+            except Exception as e_legal:
+                print(f"--- WARNING interpreter ({env.name}): Exception getting legal_actions for P{i} (Status: {status}): {type(e_legal).__name__}: {e_legal} ---")
+                if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] remains default [] due to exception. ---")
+                pass # Leave empty if error
 
 
         new_states.append({"reward": reward, "info": info_dict, "observation": obs_dict, "status": status})
@@ -343,13 +321,23 @@ def interpreter(state, env):
 
 def renderer(state_history_entry, env):
     """Kaggle renderer function."""
-    if (state_history_entry and len(state_history_entry)>0 and hasattr(state_history_entry[0],"observation") and
-        state_history_entry[0].observation is not None and isinstance(state_history_entry[0].observation,dict) and
-        "raw_observation_string" in state_history_entry[0].observation):
-        board=state_history_entry[0].observation["raw_observation_string"]; return board if board is not None else "Obs string None"
-    else: print(f"--- WARNING renderer ({env.name}): Obs missing/malformed. Rendering initial. ---");
-    try: return _get_open_spiel_game(env.configuration).new_initial_state().to_string()
-    except Exception as e: print(f"--- ERROR renderer ({env.name}): Fallback failed: {e} ---"); return f"Error rendering {env.name}"
+    if (
+        state_history_entry and
+        len(state_history_entry) > 0 and
+        hasattr(state_history_entry[0], "observation") and
+        state_history_entry[0].observation is not None and
+        isinstance(state_history_entry[0].observation, dict) and
+        "raw_observation_string" in state_history_entry[0].observation
+    ):
+        board=state_history_entry[0].observation["raw_observation_string"]
+        return board if board is not None else "Obs string None"
+    else:
+        print(f"--- WARNING renderer ({env.name}): Obs missing/malformed. Rendering initial. ---")
+    try:
+        return _get_open_spiel_game(env.configuration).new_initial_state().to_string()
+    except Exception as e:
+        print(f"--- ERROR renderer ({env.name}): Fallback failed: {e} ---")
+        return f"Error rendering {env.name}"
 
 def html_renderer():
     """Provides the simplest possible HTML/JS renderer for OpenSpiel text observations."""
@@ -388,25 +376,12 @@ function renderer(context) {
 
 # --- Agents ---
 def random_agent(observation, configuration):
-    """
-    A built-in random agent specifically for OpenSpiel environments.
-    Chooses randomly from the 'legal_actions' provided in the observation.
-    """
-    legal_actions = observation.get("legal_actions") # Get the list of legal actions
-
-    # Check if legal_actions is a non-empty list
-    if isinstance(legal_actions, list) and legal_actions:
-        action = random.choice(legal_actions)
-        # Optional: Add debug print if needed
-        # print(f"DEBUG (open_spiel random_agent): Choosing action {action} from {legal_actions}")
-        return int(action) # Ensure the action is an integer
-    else:
-        # Fallback if no legal actions are provided or the list is empty.
-        # This might happen if the agent is called inappropriately (e.g., terminal state)
-        # or if there's an issue generating legal actions in the interpreter.
-        # Returning 0 is a safe default as action IDs are typically non-negative integers.
-        print(f"WARNING (open_spiel random_agent): No valid legal_actions found in observation: {legal_actions}. Returning default action 0.")
-        return 0
+    """A built-in random agent specifically for OpenSpiel environments. """
+    legal_actions = observation.get("legal_actions")
+    if not legal_actions:
+        raise ValueError(f'No legal actions found in: {observation}')
+    action = random.choice(legal_actions)
+    return int(action)
 
 agents = {"random": random_agent}
 
@@ -422,22 +397,30 @@ try:
         short_name = game_info.short_name; long_name = game_info.long_name
         if not short_name: skipped_loads += 1; continue
         try:
-            loaded_game = pyspiel.load_game(short_name); num_players = loaded_game.num_players(); max_len = loaded_game.max_game_length()
-            if num_players <= 0: print(f"  Skipping '{short_name}': num_players={num_players}."); skipped_loads += 1; continue
+            loaded_game = pyspiel.load_game(short_name)
+            num_players = loaded_game.num_players()
+            max_len = loaded_game.max_game_length()
+            if num_players <= 0:
+                print(f"  Skipping '{short_name}': num_players={num_players}.")
+                skipped_loads += 1
+                continue
 
             # Use the template with detailed observation properties WORKAROUND
             game_spec = copy.deepcopy(BASE_SPEC_TEMPLATE)
             env_name = f"open_spiel_{short_name.replace('-', '_').replace('.', '_')}"
 
             # Populate ONLY the fields defined in the minimal template
-            game_spec["name"] = env_name; game_spec["title"] = f"OpenSpiel: {long_name}"
+            game_spec["name"] = env_name
+            game_spec["title"] = f"OpenSpiel: {long_name}"
             desc_range = f"{game_info.min_num_players}" + (f"-{game_info.max_num_players}" if game_info.min_num_players != game_info.max_num_players else "")
             game_spec["description"] = f"Kaggle env for OpenSpiel: {long_name} ({short_name}). Requires {num_players}. Supports: {desc_range}."
             game_spec["agents"] = [num_players]
 
             # Set configuration defaults
-            if 0 < max_len < MAX_LEN_THRESHOLD: episode_steps = max_len
-            else: episode_steps = DEFAULT_EPISODE_STEPS
+            if 0 < max_len < MAX_LEN_THRESHOLD:
+                episode_steps = max_len
+            else:
+                episode_steps = DEFAULT_EPISODE_STEPS
             game_spec["configuration"]["episodeSteps"]["default"] = episode_steps
             game_spec["configuration"]["openSpielGameName"]["default"] = short_name
 
@@ -453,8 +436,11 @@ try:
                 "agents": agents,
             }
             successful_loads += 1
-        except pyspiel.SpielError as e: print(f"--- INFO Skipping '{short_name}': Load failed (needs config?). Error: {e} ---"); skipped_loads += 1; continue
-        except Exception as e: print(f"--- WARNING Skipping '{short_name}': Unexpected error: {type(e).__name__}: {e} ---"); skipped_loads += 1; continue
+        except Exception as e:
+            print(f"--- WARNING Skipping '{short_name}': Unexpected error: {type(e).__name__}: {e} ---")
+            skipped_loads += 1
+            continue
+
 except ImportError as e:
      if 'pyspiel' in str(e): print(f"--- CRITICAL ERROR: pyspiel import failed. {e} ---")
      else: print(f"--- !!! ERROR during generation (Import): {e} !!! ---")
@@ -462,4 +448,3 @@ except ImportError as e:
 except Exception as e: print(f"--- !!! UNEXPECTED TOP-LEVEL ERROR during generation: {type(e).__name__}: {e} !!! ---")
 print(f"--- Finished dynamic generation. Prepared specs for {successful_loads} games. Skipped {skipped_loads} games. ---")
 print(f"--- Final count of OpenSpiel environments prepared for registration: {len(registered_spiel_envs)} ---")
-# --- END of open_spiel.py ---
