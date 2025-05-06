@@ -55,21 +55,22 @@
     <script>
       
 window.kaggle = {
-  "debug": false,
+  "debug": true,
   "playing": true,
   "step": 0,
   "controls": true,
   "environment": {
-    "id": "51fe6f64-293e-11f0-b216-5e39048433f2",
+    "id": "f2c40f06-2a8f-11f0-a674-a666edc7b723",
     "name": "open_spiel_tic_tac_toe",
     "title": "OpenSpiel: Tic Tac Toe",
-    "description": "Kaggle env for OpenSpiel: Tic Tac Toe (tic_tac_toe). Requires 2. Supports: 2.",
+    "description": "Kaggle env for OpenSpiel: Tic Tac Toe (tic_tac_toe). 2 players + 1 chance agent. Supports range: 2 players.",
     "version": "0.1.0",
     "configuration": {
-      "episodeSteps": 9,
+      "episodeSteps": 109,
       "actTimeout": 5.0,
       "runTimeout": 1200.0,
-      "openSpielGameName": "tic_tac_toe"
+      "openSpielGameName": "tic_tac_toe",
+      "randomSeed": 338718598
     },
     "specification": {
       "action": {
@@ -81,13 +82,13 @@ window.kaggle = {
         "default": 0
       },
       "agents": [
-        2
+        3
       ],
       "configuration": {
         "episodeSteps": {
           "description": "Maximum number of steps (actions taken) in an episode.",
           "type": "integer",
-          "default": 9
+          "default": 109
         },
         "actTimeout": {
           "description": "Maximum runtime (seconds) to obtain an action from an agent.",
@@ -103,6 +104,14 @@ window.kaggle = {
           "description": "The short_name of the OpenSpiel game to load. This is fixed for this environment.",
           "type": "string",
           "default": "tic_tac_toe"
+        },
+        "randomSeed": {
+          "description": "Seed for the random number generator used for chance events. If null/absent, a seed is generated.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "default": null
         }
       },
       "info": {},
@@ -177,6 +186,36 @@ window.kaggle = {
     "steps": [
       [
         {
+          "action": 0,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 0,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 0,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
           "reward": 0.0,
           "info": {},
           "observation": {
@@ -198,10 +237,10 @@ window.kaggle = {
             "is_terminal": false,
             "player_id": 0,
             "remainingOverageTime": 12,
-            "step": 0
+            "step": 1
           },
           "status": "ACTIVE",
-          "action": 0
+          "action": null
         },
         {
           "reward": 0.0,
@@ -218,35 +257,7 @@ window.kaggle = {
             "step": 1
           },
           "status": "INACTIVE",
-          "action": 0
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "...\n...\n...",
-            "observation_tensor": [],
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 1
-          },
-          "status": "ACTIVE"
+          "action": null
         },
         {
           "reward": 0.0,
@@ -258,266 +269,12 @@ window.kaggle = {
             "legal_actions": [],
             "current_player": 0,
             "is_terminal": false,
-            "player_id": 1,
+            "player_id": 2,
             "remainingOverageTime": 12,
             "step": 1
           },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 0
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\n...",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 2
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\n...",
-            "observation_tensor": [],
-            "legal_actions": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 2
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\n.o.",
-            "observation_tensor": [],
-            "legal_actions": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              8
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 3
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 7
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\n.o.",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 3
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 6
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 4
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "x..\n...\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [
-              1,
-              2,
-              3,
-              4,
-              5,
-              8
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 4
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xo.\n...\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [
-              2,
-              3,
-              4,
-              5,
-              8
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 5
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 1
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xo.\n...\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 5
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 5
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xo.\n..x\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 6
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xo.\n..x\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [
-              2,
-              3,
-              4,
-              8
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 6
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xoo\n..x\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [
-              3,
-              4,
-              8
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0,
-            "remainingOverageTime": 12,
-            "step": 7
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "reward": 0.0,
-          "info": {
-            "submitted_action": 2
-          },
-          "observation": {
-            "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xoo\n..x\nxo.",
-            "observation_tensor": [],
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1,
-            "remainingOverageTime": 12,
-            "step": 7
-          },
-          "status": "INACTIVE"
+          "status": "INACTIVE",
+          "action": null
         }
       ],
       [
@@ -528,7 +285,376 @@ window.kaggle = {
           },
           "observation": {
             "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xoo\n.xx\nxo.",
+            "raw_observation_string": "...\n.x.\n...",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 2
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\n.x.\n...",
+            "observation_tensor": [],
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              5,
+              6,
+              7,
+              8
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 2
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\n.x.\n...",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 2
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n...",
+            "observation_tensor": [],
+            "legal_actions": [
+              0,
+              1,
+              2,
+              5,
+              6,
+              7,
+              8
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 3
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 3
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n...",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 3
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n...",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 3
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 7
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 4
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [
+              0,
+              1,
+              2,
+              5,
+              6,
+              8
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 4
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\nox.\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 4
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [
+              0,
+              1,
+              2,
+              6,
+              8
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 5
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 5
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 5
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "...\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 5
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 0
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 6
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [
+              1,
+              2,
+              6,
+              8
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 6
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.x.",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 6
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.xo",
+            "observation_tensor": [],
+            "legal_actions": [
+              1,
+              2,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 7
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 8
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.xo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 7
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x..\noxo\n.xo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 7
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 2
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x.x\noxo\n.xo",
             "observation_tensor": [],
             "legal_actions": [],
             "current_player": 1,
@@ -537,18 +663,19 @@ window.kaggle = {
             "remainingOverageTime": 12,
             "step": 8
           },
-          "status": "DONE"
+          "status": "INACTIVE",
+          "action": null
         },
         {
           "reward": 0.0,
           "info": {},
           "observation": {
             "openSpielGameName": "tic_tac_toe",
-            "raw_observation_string": "xoo\n.xx\nxo.",
+            "raw_observation_string": "x.x\noxo\n.xo",
             "observation_tensor": [],
             "legal_actions": [
-              3,
-              8
+              1,
+              6
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -556,15 +683,147 @@ window.kaggle = {
             "remainingOverageTime": 12,
             "step": 8
           },
-          "status": "DONE"
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x.x\noxo\n.xo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 8
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x.x\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [
+              1
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 9
+          },
+          "status": "ACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {
+            "submitted_action": 6
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x.x\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 9
+          },
+          "status": "INACTIVE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "x.x\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 9
+          },
+          "status": "INACTIVE",
+          "action": null
+        }
+      ],
+      [
+        {
+          "reward": 1.0,
+          "info": {
+            "submitted_action": 1
+          },
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "xxx\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": -4,
+            "is_terminal": true,
+            "player_id": 0,
+            "remainingOverageTime": 12,
+            "step": 10
+          },
+          "status": "DONE",
+          "action": null
+        },
+        {
+          "reward": -1.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "xxx\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": -4,
+            "is_terminal": true,
+            "player_id": 1,
+            "remainingOverageTime": 12,
+            "step": 10
+          },
+          "status": "DONE",
+          "action": null
+        },
+        {
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "openSpielGameName": "tic_tac_toe",
+            "raw_observation_string": "xxx\noxo\noxo",
+            "observation_tensor": [],
+            "legal_actions": [],
+            "current_player": -4,
+            "is_terminal": true,
+            "player_id": 2,
+            "remainingOverageTime": 12,
+            "step": 10
+          },
+          "status": "DONE",
+          "action": null
         }
       ]
     ],
     "rewards": [
-      0.0,
+      1.0,
+      -1.0,
       0.0
     ],
     "statuses": [
+      "DONE",
       "DONE",
       "DONE"
     ],
@@ -572,31 +831,44 @@ window.kaggle = {
     "info": {}
   },
   "logs": [
+    [],
+    [],
     [
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'action': 0, 'reward': 0.0, 'info': {}, 'observation': {'remainingOverageTime': 12, 'step': 0}, 'status': 'INACTIVE'}, {'action': 0, 'reward': 0.0, 'info': {}, 'observation': {'remainingOverageTime': 12}, 'status': 'INACTIVE'}]\n--- DEBUG _reconstruct: History len=1, num_calls=0 ---\n--- DEBUG _reconstruct: Finished reconstruction. Final state string:\n...\n...\n... ---\n--- DEBUG INTERPRETER (open_spiel_tic_tac_toe): P0 legal_actions returned: [0, 1, 2, 3, 4, 5, 6, 7, 8] (Type: <class 'list'>) ---\n",
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "duration": 3e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "duration": 2e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "stdout": "--- INTERPRETER: Initializing/Resetting Global State (Steps len: 1, env.done: False) ---\n--- INTERPRETER: RNG seeded with 338718598 ---\n--- DEBUG INTERPRETER (Step 1): Player 0 Node ---\n--- DEBUG INTERPRETER END STEP 1: Returning new_states ---\n  Agent 0: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 1: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ],
     [
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'action': 0, 'reward': 0.0, 'info': {}, 'observation': {'remainingOverageTime': 12, 'step': 0}, 'status': 'INACTIVE'}, {'action': 0, 'reward': 0.0, 'info': {}, 'observation': {'remainingOverageTime': 12}, 'status': 'INACTIVE'}]\n--- DEBUG _reconstruct: History len=1, num_calls=0 ---\n--- DEBUG _reconstruct: Finished reconstruction. Final state string:\n...\n...\n... ---\n--- DEBUG INTERPRETER (open_spiel_tic_tac_toe): P0 legal_actions returned: [0, 1, 2, 3, 4, 5, 6, 7, 8] (Type: <class 'list'>) ---\n",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 1.7e-05,
+        "duration": 1.1e-05,
         "stdout": "",
         "stderr": ""
       },
       {},
+      {},
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': '...\\n...\\n...', 'observation_tensor': [], 'legal_actions': [0, 1, 2, 3, 4, 5, 6, 7, 8], 'current_player': 0, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 0}, 'status': 'ACTIVE', 'action': 4}, {'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': '...\\n...\\n...', 'observation_tensor': [], 'legal_actions': [], 'current_player': 0, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 1}, 'status': 'INACTIVE', 'action': 0}]\n--- DEBUG _reconstruct: History len=1, num_calls=0 ---\n--- DEBUG _reconstruct: Finished reconstruction. Final state string:\n...\n...\n... ---\n--- DEBUG INTERPRETER (open_spiel_tic_tac_toe): P0 legal_actions returned: [0, 1, 2, 3, 4, 5, 6, 7, 8] (Type: <class 'list'>) ---\n",
+        "stdout": "--- DEBUG INTERPRETER (Step 2): Player 0 Node ---\n--- DEBUG INTERPRETER: Applied P0 action 4 ---\n--- DEBUG INTERPRETER END STEP 2: Returning new_states ---\n  Agent 0: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 4}\n  Agent 1: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ],
     [
+      {},
       {
         "duration": 9e-06,
         "stdout": "",
@@ -604,19 +876,7 @@ window.kaggle = {
       },
       {},
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': '...\\n...\\n...', 'observation_tensor': [], 'legal_actions': [0, 1, 2, 3, 4, 5, 6, 7, 8], 'current_player': 0, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 1}, 'status': 'ACTIVE', 'action': 0}, {'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': '...\\n...\\n...', 'observation_tensor': [], 'legal_actions': [], 'current_player': 0, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 1}, 'status': 'INACTIVE', 'action': 0}]\n--- DEBUG _reconstruct: History len=2, num_calls=1 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player turn. ---\n--- DEBU",
-        "stderr": ""
-      }
-    ],
-    [
-      {},
-      {
-        "duration": 9e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {'submitted_action': 0}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\n...', 'observation_tensor': [], 'legal_actions': [], 'current_player': 1, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 2}, 'status': 'INACTIVE', 'action': 0}, {'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\n...', 'observation_tensor': [], 'legal_actions': [1, 2, 3, 4, 5, 6, 7, 8], 'current_player': 1, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 2}, 'status': 'ACTIVE', 'action': 7}]\n--- DEBUG _reconstruct: History len=3, num_calls=2 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player ",
+        "stdout": "--- DEBUG INTERPRETER (Step 3): Player 1 Node ---\n--- DEBUG INTERPRETER: Applied P1 action 3 ---\n--- DEBUG INTERPRETER END STEP 3: Returning new_states ---\n  Agent 0: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 1: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 3}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ],
@@ -627,44 +887,22 @@ window.kaggle = {
         "stderr": ""
       },
       {},
+      {},
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\n.o.', 'observation_tensor': [], 'legal_actions': [1, 2, 3, 4, 5, 6, 8], 'current_player': 0, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 3}, 'status': 'ACTIVE', 'action': 6}, {'reward': 0.0, 'info': {'submitted_action': 7}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\n.o.', 'observation_tensor': [], 'legal_actions': [], 'current_player': 0, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 3}, 'status': 'INACTIVE', 'action': 0}]\n--- DEBUG _reconstruct: History len=4, num_calls=3 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player tur",
+        "stdout": "--- DEBUG INTERPRETER (Step 4): Player 0 Node ---\n--- DEBUG INTERPRETER: Applied P0 action 7 ---\n--- DEBUG INTERPRETER END STEP 4: Returning new_states ---\n  Agent 0: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 7}\n  Agent 1: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ],
     [
       {},
       {
-        "duration": 7e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {'submitted_action': 6}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\nxo.', 'observation_tensor': [], 'legal_actions': [], 'current_player': 1, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 4}, 'status': 'INACTIVE', 'action': 0}, {'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'x..\\n...\\nxo.', 'observation_tensor': [], 'legal_actions': [1, 2, 3, 4, 5, 8], 'current_player': 1, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 4}, 'status': 'ACTIVE', 'action': 1}]\n--- DEBUG _reconstruct: History len=5, num_calls=4 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player turn. ",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 7e-06,
+        "duration": 1.1e-05,
         "stdout": "",
         "stderr": ""
       },
       {},
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xo.\\n...\\nxo.', 'observation_tensor': [], 'legal_actions': [2, 3, 4, 5, 8], 'current_player': 0, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 5}, 'status': 'ACTIVE', 'action': 5}, {'reward': 0.0, 'info': {'submitted_action': 1}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xo.\\n...\\nxo.', 'observation_tensor': [], 'legal_actions': [], 'current_player': 0, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 5}, 'status': 'INACTIVE', 'action': 0}]\n--- DEBUG _reconstruct: History len=6, num_calls=5 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player turn. ---",
-        "stderr": ""
-      }
-    ],
-    [
-      {},
-      {
-        "duration": 7e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {'submitted_action': 5}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xo.\\n..x\\nxo.', 'observation_tensor': [], 'legal_actions': [], 'current_player': 1, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 6}, 'status': 'INACTIVE', 'action': 0}, {'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xo.\\n..x\\nxo.', 'observation_tensor': [], 'legal_actions': [2, 3, 4, 8], 'current_player': 1, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 6}, 'status': 'ACTIVE', 'action': 2}]\n--- DEBUG _reconstruct: History len=7, num_calls=6 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player turn. ---\n--",
+        "stdout": "--- DEBUG INTERPRETER (Step 5): Player 1 Node ---\n--- DEBUG INTERPRETER: Applied P1 action 5 ---\n--- DEBUG INTERPRETER END STEP 5: Returning new_states ---\n  Agent 0: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 1: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 5}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ],
@@ -675,8 +913,61 @@ window.kaggle = {
         "stderr": ""
       },
       {},
+      {},
       {
-        "stdout": "DEBUG INTERPRETER START:\n[{'reward': 0.0, 'info': {}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xoo\\n..x\\nxo.', 'observation_tensor': [], 'legal_actions': [3, 4, 8], 'current_player': 0, 'is_terminal': False, 'player_id': 0, 'remainingOverageTime': 12, 'step': 7}, 'status': 'ACTIVE', 'action': 4}, {'reward': 0.0, 'info': {'submitted_action': 2}, 'observation': {'openSpielGameName': 'tic_tac_toe', 'raw_observation_string': 'xoo\\n..x\\nxo.', 'observation_tensor': [], 'legal_actions': [], 'current_player': 0, 'is_terminal': False, 'player_id': 1, 'remainingOverageTime': 12, 'step': 7}, 'status': 'INACTIVE', 'action': 0}]\n--- DEBUG _reconstruct: History len=8, num_calls=7 ---\n--- DEBUG _reconstruct: Processing history step index 1 (corresponds to end of game step 0) ---\n--- DEBUG _reconstruct: Expecting player action for step 0, OS Player=0 ---\n--- DEBUG _reconstruct: No valid action found in history info for P0 at step 1. State remains unchanged for this player turn. ---\n--- D",
+        "stdout": "--- DEBUG INTERPRETER (Step 6): Player 0 Node ---\n--- DEBUG INTERPRETER: Applied P0 action 0 ---\n--- DEBUG INTERPRETER END STEP 6: Returning new_states ---\n  Agent 0: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 0}\n  Agent 1: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      {},
+      {
+        "duration": 8e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {},
+      {
+        "stdout": "--- DEBUG INTERPRETER (Step 7): Player 1 Node ---\n--- DEBUG INTERPRETER: Applied P1 action 8 ---\n--- DEBUG INTERPRETER END STEP 7: Returning new_states ---\n  Agent 0: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 1: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 8}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 1e-05,
+        "stdout": "",
+        "stderr": ""
+      },
+      {},
+      {},
+      {
+        "stdout": "--- DEBUG INTERPRETER (Step 8): Player 0 Node ---\n--- DEBUG INTERPRETER: Applied P0 action 2 ---\n--- DEBUG INTERPRETER END STEP 8: Returning new_states ---\n  Agent 0: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 2}\n  Agent 1: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      {},
+      {
+        "duration": 1e-05,
+        "stdout": "",
+        "stderr": ""
+      },
+      {},
+      {
+        "stdout": "--- DEBUG INTERPRETER (Step 9): Player 1 Node ---\n--- DEBUG INTERPRETER: Applied P1 action 6 ---\n--- DEBUG INTERPRETER END STEP 9: Returning new_states ---\n  Agent 0: Status=ACTIVE, Reward=0.0, Action=None, Info={}\n  Agent 1: Status=INACTIVE, Reward=0.0, Action=None, Info={'submitted_action': 6}\n  Agent 2: Status=INACTIVE, Reward=0.0, Action=None, Info={}\n",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 9e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {},
+      {},
+      {
+        "stdout": "--- DEBUG INTERPRETER (Step 10): Player 0 Node ---\n--- DEBUG INTERPRETER: Applied P0 action 1 ---\n--- DEBUG INTERPRETER END STEP 10: Returning new_states ---\n  Agent 0: Status=DONE, Reward=1.0, Action=None, Info={'submitted_action': 1}\n  Agent 1: Status=DONE, Reward=-1.0, Action=None, Info={}\n  Agent 2: Status=DONE, Reward=0.0, Action=None, Info={}\n",
         "stderr": ""
       }
     ]

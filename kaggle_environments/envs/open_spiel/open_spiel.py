@@ -102,221 +102,231 @@ BASE_SPEC_TEMPLATE = {
 }
 
 
+_OS_GLOBAL_STATE = None
+_OS_GLOBAL_RNG = None 
 _OS_GAME_CACHE = {}
 def _get_open_spiel_game(env_config: dict) -> pyspiel.Game:
     game_name = env_config.get("openSpielGameName", "tic_tac_toe")
     game_settings_dict = env_config.get("openSpielGameSettings", {})
     game_settings_tuple = tuple(sorted(game_settings_dict.items()))
-    cache_key= (game_name,game_settings_tuple)
+    cache_key = (game_name, game_settings_tuple)
     if cache_key in _OS_GAME_CACHE:
         return _OS_GAME_CACHE[cache_key]
     try:
         game_params = {str(k): str(v) for k, v in game_settings_dict.items()}
-        game=pyspiel.load_game(game_name, game_params)
-        _OS_GAME_CACHE[cache_key]=game
+        game = pyspiel.load_game(game_name, game_params)
+        _OS_GAME_CACHE[cache_key] = game
         return game
     except Exception as e:
         print(f"*** ERROR (_get_open_spiel_game): Failed loading '{game_name}': {e} ***")
         raise
 
-def _reconstruct_os_state(game: pyspiel.Game, kaggle_steps_history: list, num_expected_agents: int) -> pyspiel.State:
-    # kaggle_steps_history[0] is the initial dummy state from core.py
-    # kaggle_steps_history[1] is the list returned by interpreter after step 0
-    # kaggle_steps_history[k] is the list returned by interpreter after step k-1
-    num_interpreter_calls = len(kaggle_steps_history) - 1 # Number of actual game steps processed so far
+def _reconstruct_os_state(game: pyspiel.Game, kaggle_history: list, num_expected_agents: int) -> pyspiel.State:
+    num_interpreter_calls = len(kaggle_history) - 1
     os_state = game.new_initial_state()
-    print(f"--- DEBUG _reconstruct: History len={len(kaggle_steps_history)}, num_calls={num_interpreter_calls} ---")
-
-    for i in range(num_interpreter_calls): # Iterate through steps 0, 1, ..., k-1
-        step_output = kaggle_steps_history[i+1] # Output state list from interpreter call 'i'
-        print(f"--- DEBUG _reconstruct: Processing history step index {i+1} (corresponds to end of game step {i}) ---")
-
-        # Apply chance moves deterministically FIRST for this step transition
-        # This assumes chance nodes are resolved *before* the player acts in a step.
-        while os_state.is_chance_node():
-             outcomes = os_state.chance_outcomes()
-             if outcomes:
-                 # Apply the first outcome deterministically (consistent with interpreter)
-                 chance_action = outcomes[0][0]
-                 print(f"--- DEBUG _reconstruct: Applying chance action {chance_action} before player action in step {i} ---")
-                 os_state.apply_action(chance_action)
-             else:
-                 print(f"--- WARNING _reconstruct: Chance node with no outcomes at step {i} ---")
-                 break # Should not happen
-
-        # Check for terminal state *after* chance resolution
-        if os_state.is_terminal():
-            print(f"--- DEBUG _reconstruct: State became terminal after chance node in step {i}. Stopping. ---")
-            break
-
-        # Now apply the player's action for step 'i'
-        os_player=os_state.current_player()
-        print(f"--- DEBUG _reconstruct: Expecting player action for step {i}, OS Player={os_player} ---")
-
-        if 0 <= os_player < num_expected_agents:
-            # Retrieve the action that was successfully applied in step 'i' from the 'info' dict.
-            action_applied_in_step = step_output[os_player].info.get("submitted_action")
-
-            if action_applied_in_step is not None:
-                legal=os_state.legal_actions()
-                if action_applied_in_step in legal:
-                    print(f"--- DEBUG _reconstruct: Applying action {action_applied_in_step} for P{os_player} from history step {i+1} ---")
-                    os_state.apply_action(action_applied_in_step) # Corrected variable name
+    for i, kaggle_state in enumerate(kaggle_history):
+        if i == 0:
+            # kaggle_history[0] is the initial dummy state from core.py
+            continue
+        os_current_player = os_state.current_player()
+        # TODO fix but this is not the bug
+        if -1 <= os_current_player < num_expected_agents:
+            action = kaggle_state[os_current_player].info.get("submitted_action")
+            if action is not None:
+                legal_actions = list(os_state.legal_actions())
+                if action in legal_actions:
+                    os_state.apply_action(action)
                 else:
-                    # This indicates a divergence between the game logic and the history.
-                    print(f"*** CRITICAL WARNING (_reconstruct): Hist. action {action_applied_in_step} for P{os_player} from step {i+1} ILLEGAL. State likely DIVERGED. Legal: {legal} ***")
-                    break # Stop reconstruction on divergence
+                    raise ValueError(f"_reconstruct_os_state failed to find action {action} in legal actions: {legal_actions}")
             else:
-                 # This means the agent's action in step 'i' was invalid/timeout/None.
-                 # The game state should not have advanced for this player's turn in that step.
-                 print(f"--- DEBUG _reconstruct: No valid action found in history info for P{os_player} at step {i+1}. State remains unchanged for this player turn. ---")
-                 # Continue to the next step in history.
-        elif os_player == pyspiel.PlayerId.SIMULTANEOUS:
-             # TODO: Handle reconstruction for simultaneous games if needed. Requires storing list in info.
-             print(f"*** WARNING (_reconstruct): Simultaneous move reconstruction not fully implemented. State may diverge. ***")
-             break # Stop for now
-
-    print(f"--- DEBUG _reconstruct: Finished reconstruction. Final state string:\n{os_state.to_string()} ---")
+                raise ValueError(f"_reconstruct_os_state found None action for current player {os_current_player} in state: {os_state}")
+        elif os_current_player == pyspiel.PlayerId.SIMULTANEOUS:
+            raise NotImplementedError
     return os_state
 
-# --- Core Kaggle Environment Functions ---
+
 def interpreter(state, env):
-    """Kaggle interpreter function."""
-    # Get game name/settings from RUNTIME configuration passed via make()
-    print("DEBUG INTERPRETER START:")
-    print(state)
-    game_name = env.configuration.get("openSpielGameName", "tic_tac_toe")
-    game = _get_open_spiel_game({"openSpielGameName": game_name, **env.configuration})
-    num_agents = game.num_players()
+    """Kaggle interpreter function using global state and a chance agent."""
+    global _OS_GLOBAL_STATE, _OS_GLOBAL_RNG
+    kaggle_state = state
 
-    if len(state) != num_agents: raise ValueError(f"Runtime agent count {len(state)} != game players {num_agents} for '{game_name}'.")
+    # TODO
+    if env.done:
+        return state
+    
+    # --- Get Game Info ---
+    game_name = env.configuration.get("openSpielGameName")
+    game = _get_open_spiel_game(env.configuration)
+    num_players = game.num_players() # Actual number of players
+    num_agents = len(kaggle_state)
+    if num_agents not in [num_players, num_players + 1]:
+        # Could include a chance agent
+        raise ValueError(f"Invalid num_agents: {num_agents}")
 
-    os_state = _reconstruct_os_state(game, env.steps, num_agents)
-    applied_actions = [None] * num_agents # Track successfully applied actions for storing in info
+    statuses = [kaggle_state[os_current_player].status for os_current_player in range(num_agents)]
+    if not any([status == "ACTIVE" for status in statuses]):
+        raise ValueError("No active agents.")
 
-    # --- ADDED DEBUG: State *after* chance nodes, *before* action processing ---
-    if env.debug:
-        print(f"--- DEBUG INTERPRETER ({env.name}): State post-chance, pre-action. IsTerminal: {os_state.is_terminal()}, CurrentPlayer: {os_state.current_player()}, IsChance: {os_state.is_chance_node()} ---")
-        print(f"--- State String:\n{os_state.to_string()}\n--- End State String ---")
+    # --- Initialization / Reset ---
+    is_initial_step = len(env.steps) == 1
+    # Reset if global state is missing OR it's not step 1 and core.py indicates env is done
+    if _OS_GLOBAL_STATE is None or (not is_initial_step and env.done):
+        print(f"--- INTERPRETER: Initializing/Resetting Global State (Steps len: {len(env.steps)}, env.done: {env.done}) ---")
+        _OS_GLOBAL_STATE = game.new_initial_state()
 
-    if not os_state.is_terminal():
-        is_initial_reset_call = (len(env.steps) == 1) # Check if this is the first interpreter call during reset
-        active_player = os_state.current_player()
-
-        # --- Step 1: Process Submitted Player Action ---
-        # Only apply if not initial reset and the current state is a player node (not chance/terminal)
-        if not is_initial_reset_call and not os_state.is_chance_node():
-            if active_player == pyspiel.PlayerId.SIMULTANEOUS:
-                # TODO: Refine simultaneous game handling if needed.
-                # Need to know how the specific OpenSpiel game expects actions (list length, handling of None/invalid).
-                actions_submitted = [state[idx].action for idx in range(num_agents)]
+        # Initialize/Re-initialize RNG for the episode
+        seed = env.configuration.get("randomSeed")
+        if seed is None:
+            seed = random.randint(0, 1_000_000_000)
+            # Store generated seed back into config IF it's mutable (it should be)
+            try:
+                env.configuration["randomSeed"] = seed
+            except:
+                print("--- WARNING: Could not store generated seed back to env.configuration ---")
+                print(f"--- INTERPRETER: Generated random seed for episode: {seed} ---")
+        else:
+            try:
+                seed = int(seed)
+            except (ValueError, TypeError):
+                print(f"--- WARNING INTERPRETER: Invalid randomSeed '{seed}'. Generating random seed. ---")
+                seed = random.randint(0, 1_000_000_000)
                 try:
-                    # Assuming apply_actions handles None or requires a specific invalid action constant.
-                    # actions_to_apply = [a if a is not None else pyspiel.INVALID_ACTION for a in actions_submitted] # Example
-                    os_state.apply_actions(actions_submitted) # Or actions_to_apply
-                    # Store submitted actions. Status might need update based on apply_actions result/exceptions.
-                    applied_actions = actions_submitted
-                except Exception as e:
-                    print(f"*** ERROR interpreter ({env.name}): apply_actions failed: {e} ***")
-                    # Mark all involved agents as ERROR? Or check individual action validity? Complex.
-                    for i in range(num_agents): state[i].status = "ERROR" # Simplistic approach
-            elif 0 <= active_player < num_agents:
-                action = state[active_player].action # Action submitted by the agent for this step
-                if action is not None:
-                    legal = os_state.legal_actions()
-                    if action in legal:
-                        try:
-                            os_state.apply_action(action)
-                            applied_actions[active_player] = action # Store successfully applied action
-                        except Exception as e:
-                            print(f"*** ERROR interpreter ({env.name}): apply_action failed for P{active_player} action {action}: {e} ***")
-                            state[active_player].status = "ERROR" # Mark agent status based on input state
-                    else:
-                        # Action submitted was illegal according to the state before the action
-                        print(f"--- INFO interpreter ({env.name}): P{active_player} submitted INVALID action {action}. Legal: {legal} ---")
-                        state[active_player].status = "INVALID" # Mark agent status based on input state
-                        applied_actions[active_player] = None # Ensure no action is recorded as applied
-                # else: action is None (e.g., agent timed out or returned None), state doesn't change for this player. Status handled by core.py?
+                    env.configuration["randomSeed"] = seed
+                except:
+                    pass # Ignore error storing back
 
-    # --- Step 2: Handle Chance Nodes AFTER player action (if any) ---
-    while os_state.is_chance_node():
-        outcomes = os_state.chance_outcomes()
-        if outcomes: os_state.apply_action(outcomes[0][0]) # Apply first outcome deterministically
-        else: print(f"--- WARNING interpreter ({env.name}): Chance node with no outcomes ---"); break
+        _OS_GLOBAL_RNG = random.Random(seed)
+        print(f"--- INTERPRETER: RNG seeded with {seed} ---")
 
-    # --- Step 3: Generate next states for Kaggle based on the final os_state ---
-    new_states = []; is_terminal = os_state.is_terminal()
-    returns = os_state.returns() if is_terminal else [0.0] * num_agents
-    next_player = os_state.current_player()
-    # Use core.py's configuration defaults if available, else fallback
+        # Initial state is now set. The loop below will handle the first "real" step.
+        # Do NOT resolve initial chance nodes here; let the main loop handle it as the first action.
+
+    # --- Main Step Processing ---
+    os_state = _OS_GLOBAL_STATE
+    # os_state = _reconstruct_os_state(game, env.steps, num_agents)
+    os_current_player = os_state.current_player()
+    kaggle_current_player = os_current_player if os_current_player != -1 else num_players
+
+    submitted_player_action = None
+    if 0 <= kaggle_current_player < num_agents:
+        # --- Player Node Resolution ---
+        print(f"--- DEBUG INTERPRETER (Step {len(env.steps)}): Player {os_current_player} Node ---")
+        action_submitted = kaggle_state[kaggle_current_player].action
+        agent_status = kaggle_state[kaggle_current_player].status
+        # Only process action if agent is ACTIVE (core.py handles TIMEOUT/ERROR status)
+        if agent_status == "ACTIVE" and not is_initial_step:
+            if action_submitted is not None:
+                legal = os_state.legal_actions()
+                if action_submitted in legal:
+                    try:
+                        os_state.apply_action(action_submitted)
+                        submitted_player_action = int(action_submitted) # Store successfully applied action
+                        print(f"--- DEBUG INTERPRETER: Applied P{os_current_player} action {submitted_player_action} ---")
+                    except Exception as e:
+                        print(f"*** ERROR INTERPRETER: apply_action failed for P{os_current_player} action {action_submitted}: {e} ***")
+                        kaggle_state[os_current_player].status = "ERROR" # Mark agent status for return
+                else:
+                    print(f"--- INFO INTERPRETER: P{os_current_player} submitted INVALID action {action_submitted}. Legal: {legal} ---")
+                    kaggle_state[os_current_player].status = "INVALID" # Mark agent status for return
+            else:
+                 # Agent returned None but status was ACTIVE
+                 # Check if None is allowed by spec ["integer", "null"]?
+                 action_spec_type = env.specification.action.get("type", ["integer"])
+                 is_null_allowed = "null" in action_spec_type or "None" in action_spec_type
+                 if not is_null_allowed:
+                     print(f"--- INFO INTERPRETER: P{os_current_player} returned None action (treated as INVALID) ---")
+                     kaggle_state[os_current_player].status = "INVALID"
+                 # else: None is allowed, state remains unchanged.
+
+        # If agent had TIMEOUT/ERROR/INVALID status, we don't apply action, state remains unchanged.
+        # core.py will preserve the status.
+
+    elif os_current_player == pyspiel.PlayerId.SIMULTANEOUS:
+        raise NotImplementedError
+    elif os_current_player == pyspiel.PlayerId.TERMINAL:
+        print(f"--- DEBUG INTERPRETER (Step {len(env.steps)}): Terminal Node ---")
+        pass
+    else:
+        raise ValueError(f"INTERPRETER: Unknown OpenSpiel player ID: {os_current_player}")
+
+    # Update Global State
+    _OS_GLOBAL_STATE = os_state
+
+    # --- Determine Next State Info for Kaggle ---
+    is_terminal = _OS_GLOBAL_STATE.is_terminal()
+    # TODO this needs to match # players + 1
+    returns = _OS_GLOBAL_STATE.returns() if is_terminal else [0.0] * num_players
+    # TODO str(state)?
+    os_state_str = _OS_GLOBAL_STATE.to_string()
+
+    if is_terminal:
+        os_next_player = pyspiel.PlayerId.TERMINAL
+    elif _OS_GLOBAL_STATE.is_chance_node():
+        os_next_player = pyspiel.PlayerId.CHANCE
+    else:
+        os_next_player = _OS_GLOBAL_STATE.current_player()
+    
+    # TODO
+    kaggle_next_player = os_next_player
+    if kaggle_next_player == -1:
+        kaggle_next_player = num_players
+
+    # --- Generate Kaggle States (N Players + 1 Chance Agent) ---
+    new_states = []
     act_timeout_default = env.configuration.get("actTimeout", DEFAULT_ACT_TIMEOUT)
 
-    for i in range(num_agents):
-        status = ""; reward = None
-        input_status = state[i].status # Get status from input state
+    for i in range(0, num_agents):
+        input_status = kaggle_state[i].status # Get status from core.py or previous interpreter step
+        status = ""
+        reward = None
 
-        # --- MODIFIED: Don't inherit INVALID/TIMEOUT/ERROR status during initial reset ---
-        # This prevents the dummy action check from incorrectly marking the initial state invalid.
-        # --- Check input status AND if the submitted action was invalid ---
-        if not is_initial_reset_call and input_status in ["INVALID", "TIMEOUT", "ERROR"]:
-            # If it's *not* the reset call, inherit the status if it's a terminal one.
-            status = input_status; reward = None
-        elif not is_initial_reset_call and i == active_player and applied_actions[i] is None and state[i].action is not None: # Check if *this* agent submitted an invalid action
-            status = state[i].status; reward = None
-        elif is_terminal: # Check if the game ended *after* the action was applied
-             status = "DONE"
-             reward = float(returns[i]) if i < len(returns) else 0.0 # Assign final rewards
-        elif i == next_player: status = "ACTIVE"; reward = env.specification.reward.default
-        else: status = "INACTIVE"; reward = env.specification.reward.default # Game continues, not this player's turn
+        if input_status in ["TIMEOUT", "ERROR", "INVALID"]:
+            status = input_status
+            reward = None # Handled by core.py mostly, but ensure no reward
+        elif is_terminal:
+            status = "DONE"
+            reward = float(returns[i]) if i < len(returns) else 0.0
+        elif kaggle_next_player == i:
+            status = "ACTIVE"
+            reward = env.specification.reward.default
+        else:
+            status = "INACTIVE"
+            reward = env.specification.reward.default
 
-        # Prepare info dict, storing the action applied by this agent (if any)
         info_dict = {}
-        submitted_action = applied_actions[i]
-        if submitted_action is not None:
-            info_dict["submitted_action"] = submitted_action
-        # Create observation dictionary, ensuring keys match the schema defined above
+        # Store the successfully applied action in info for potential debugging/analysis
+        # Check if the current player WAS player 'i' and their action was applied
+        if kaggle_current_player == i and submitted_player_action is not None:
+             info_dict["submitted_action"] = submitted_player_action
+
         obs_dict = {
-            "openSpielGameName": game_name, # Fetched from runtime config
-            "raw_observation_string": "Error: Could not generate string.",
+            "openSpielGameName": game_name,
+            "raw_observation_string": os_state_str,
             "observation_tensor": [],
             "legal_actions": [],
-            "current_player": int(next_player),
+            "current_player": int(os_next_player),  # Store OS player ID
             "is_terminal": is_terminal,
             "player_id": i,
-            # These values come from the parent state managed by core.py
-            "remainingOverageTime": state[i].observation.get("remainingOverageTime", act_timeout_default * 2), # Example fallback for overage
-            "step": len(env.steps) # Current step index
+            "remainingOverageTime": kaggle_state[i].observation.get("remainingOverageTime", act_timeout_default * 2),
+            "step": len(env.steps)
         }
-        obs_dict["raw_observation_string"] = os_state.to_string()
-        # TODO
-        # obs_dict["observation_tensor"] = [float(x) for x in os_state.observation_tensor(i)]
+        # TODO add tensors and proper player observations
+
         if status == "ACTIVE":
-            try:
-                if env.debug:
-                    print(f"--- DEBUG INTERPRETER ({env.name}): P{i} ACTIVE. About to call legal_actions. State type: {type(os_state)}, IsTerminal: {os_state.is_terminal()}, CurrentPlayer: {os_state.current_player()}, IsChance: {os_state.is_chance_node()} ---")
-                    print(f"--- State String:\n{os_state.to_string()}\n--- End State String ---")
-                if not os_state.is_chance_node():
-                    legal_acts = os_state.legal_actions(i)
-                    print(f"--- DEBUG INTERPRETER ({env.name}): P{i} legal_actions returned: {legal_acts} (Type: {type(legal_acts)}) ---")
-                    obs_dict["legal_actions"] = legal_acts
-                    # --- ADDED DEBUG: Value in obs_dict *after* assignment ---
-                    if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] set to: {obs_dict['legal_actions']} ---")
-            except Exception as e_legal:
-                print(f"--- WARNING interpreter ({env.name}): Exception getting legal_actions for P{i} (Status: {status}): {type(e_legal).__name__}: {e_legal} ---")
-                if env.debug: print(f"--- DEBUG INTERPRETER ({env.name}): P{i} obs_dict['legal_actions'] remains default [] due to exception. ---")
-                pass # Leave empty if error
+            obs_dict["legal_actions"] = _OS_GLOBAL_STATE.legal_actions()
 
+        new_states.append({
+            "reward": reward,
+            "info": info_dict,
+            "observation": obs_dict,
+            "status": status,
+            "action": None
+        })
 
-        new_states.append({"reward": reward, "info": info_dict, "observation": obs_dict, "status": status})
+    if env.debug:
+        print(f"--- DEBUG INTERPRETER END STEP {len(env.steps)}: Returning new_states ---")
+        for idx, ns in enumerate(new_states): print(f"  Agent {idx}: Status={ns['status']}, Reward={ns['reward']}, Action={ns['action']}, Info={ns['info']}")
 
-    # --- DEBUG PRINT ---
-    # Check if this is the interpreter call happening *during* the initial reset sequence.
-    # At this point, core.py has already created a default step 0, so len(env.steps) == 1.
-    is_initial_reset_call = (len(env.steps) == 1)
-    if is_initial_reset_call and env.debug:
-        print(f"--- DEBUG INTERPRETER (Reset): Returning new_states ---")
-        for idx, ns in enumerate(new_states): print(f"  Agent {idx}: Status={ns['status']}, Obs.player_id={ns['observation'].get('player_id')}, Obs.current_player={ns['observation'].get('current_player')}, Obs.legal_actions={ns['observation'].get('legal_actions')}")
-    # --- END DEBUG PRINT ---
     return new_states
 
 def renderer(state_history_entry, env):
@@ -329,10 +339,10 @@ def renderer(state_history_entry, env):
         isinstance(state_history_entry[0].observation, dict) and
         "raw_observation_string" in state_history_entry[0].observation
     ):
-        board=state_history_entry[0].observation["raw_observation_string"]
+        board = state_history_entry[0].observation["raw_observation_string"]
         return board if board is not None else "Obs string None"
-    else:
-        print(f"--- WARNING renderer ({env.name}): Obs missing/malformed. Rendering initial. ---")
+    #else:
+    #    print(f"--- WARNING renderer ({env.name}): Obs missing/malformed. Rendering initial. ---")
     try:
         return _get_open_spiel_game(env.configuration).new_initial_state().to_string()
     except Exception as e:
@@ -379,7 +389,7 @@ def random_agent(observation, configuration):
     """A built-in random agent specifically for OpenSpiel environments. """
     legal_actions = observation.get("legal_actions")
     if not legal_actions:
-        raise ValueError(f'No legal actions found in: {observation}')
+        return None
     action = random.choice(legal_actions)
     return int(action)
 
@@ -399,7 +409,7 @@ try:
         try:
             loaded_game = pyspiel.load_game(short_name)
             num_players = loaded_game.num_players()
-            max_len = loaded_game.max_game_length()
+            max_len = loaded_game.max_game_length() + 100  # TODO
             if num_players <= 0:
                 print(f"  Skipping '{short_name}': num_players={num_players}.")
                 skipped_loads += 1
@@ -414,7 +424,12 @@ try:
             game_spec["title"] = f"OpenSpiel: {long_name}"
             desc_range = f"{game_info.min_num_players}" + (f"-{game_info.max_num_players}" if game_info.min_num_players != game_info.max_num_players else "")
             game_spec["description"] = f"Kaggle env for OpenSpiel: {long_name} ({short_name}). Requires {num_players}. Supports: {desc_range}."
-            game_spec["agents"] = [num_players]
+            
+            # Handle chance nodes by adding agent.
+            num_players_actual = loaded_game.num_players()
+            num_agents_total = num_players_actual + 1
+            game_spec["agents"] = [num_agents_total]
+            game_spec["description"] = f"Kaggle env for OpenSpiel: {long_name} ({short_name}). {num_players_actual} players + 1 chance agent. Supports range: {desc_range} players."
 
             # Set configuration defaults
             if 0 < max_len < MAX_LEN_THRESHOLD:

@@ -1,20 +1,52 @@
 import os
+import random
 from kaggle_environments import make
+import pyspiel
+
+def random_agent(observation):
+    """A built-in random agent specifically for OpenSpiel environments. """
+    legal_actions = observation.get("legal_actions")
+    if not legal_actions:
+        return None
+    action = random.choice(legal_actions)
+    return int(action)
+
+agents = [random_agent] * 3
 
 # --- Configuration ---
-open_spiel_game_name = "hearts"
+open_spiel_game_name = "gin_rummy"
+game = pyspiel.load_game(open_spiel_game_name)
 environment_name = f"open_spiel_{open_spiel_game_name}"
 # TODO
-agents_to_run = ["random"] * 4
+agents_to_run = [random_agent] * (game.num_players() + 1)
 output_html_file = f"{environment_name}_game_replay.html"
 replay_width = 500
 replay_height = 450
 # Set debug=True for more verbose output during the run, False for cleaner output
-debug_mode = False
+debug_mode = True
 # --------------------
+
+def _pprint_state(state):
+    for i, player_state in enumerate(state):
+        print(f"Player {i}:")
+        print(player_state)
 
 print(f"Setting up environment: '{environment_name}'")
 env = make(environment_name, debug=debug_mode)
+#_pprint_state(env.state)
+#for _ in range(5):
+#    agent_actions = [random_agent(env.state[i].observation) for i in range(len(agents))]
+#    #print("================")
+#    #print(agent_actions)
+#    #print("================")
+#    state = env.step(agent_actions)
+#
+#    #_pprint_state(env.state)
+
+
+
+
+
 
 print(f"Running game with agents: {agents_to_run}...")
 env.run(agents_to_run)
