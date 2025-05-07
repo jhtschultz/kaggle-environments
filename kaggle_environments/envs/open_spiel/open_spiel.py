@@ -57,13 +57,6 @@ BASE_SPEC_TEMPLATE = {
             "default":
                 "PLACEHOLDER_GAME_SHORT_NAME"  # Set during generation
         },
-        "randomSeed": {
-            "description":
-                "Seed for the random number generator used for chance events. If null/absent, a seed is generated.",
-            "type": ["integer", "null"],
-            "default":
-                None
-        }
         # NOTE: openSpielGameSettings is intentionally omitted here. It's meant to be a runtime override.
     },
     "observation": {
@@ -240,37 +233,6 @@ def interpreter(state, env):
         f"--- INTERPRETER: Initializing/Resetting Global State (Steps len: {len(env.steps)}, env.done: {env.done}) ---"
     )
     _OS_GLOBAL_STATE = game.new_initial_state()
-
-    # Initialize/Re-initialize RNG for the episode
-    seed = env.configuration.get("randomSeed")
-    if seed is None:
-      seed = random.randint(0, 1_000_000_000)
-      # Store generated seed back into config IF it's mutable (it should be)
-      try:
-        env.configuration["randomSeed"] = seed
-      except:
-        print(
-            "--- WARNING: Could not store generated seed back to env.configuration ---"
-        )
-        print(f"--- INTERPRETER: Generated random seed for episode: {seed} ---")
-    else:
-      try:
-        seed = int(seed)
-      except (ValueError, TypeError):
-        print(
-            f"--- WARNING INTERPRETER: Invalid randomSeed '{seed}'. Generating random seed. ---"
-        )
-        seed = random.randint(0, 1_000_000_000)
-        try:
-          env.configuration["randomSeed"] = seed
-        except:
-          pass  # Ignore error storing back
-
-    _OS_GLOBAL_RNG = random.Random(seed)
-    print(f"--- INTERPRETER: RNG seeded with {seed} ---")
-
-    # Initial state is now set. The loop below will handle the first "real" step.
-    # Do NOT resolve initial chance nodes here; let the main loop handle it as the first action.
 
   # --- Main Step Processing ---
   os_state = _OS_GLOBAL_STATE
