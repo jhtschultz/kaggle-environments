@@ -4,12 +4,12 @@ from kaggle_environments import make
 import pyspiel
 
 def random_agent(observation):
-    """A built-in random agent specifically for OpenSpiel environments. """
-    legal_actions = observation.get("legal_actions")
-    if not legal_actions:
-        return None
-    action = random.choice(legal_actions)
-    return int(action)
+  """A built-in random agent specifically for OpenSpiel environments. """
+  legal_actions = observation.get("legal_actions")
+  if not legal_actions:
+    return None
+  action = random.choice(legal_actions)
+  return int(action)
 
 agents = [random_agent] * 3
 
@@ -18,7 +18,7 @@ open_spiel_game_name = "gin_rummy"
 game = pyspiel.load_game(open_spiel_game_name)
 environment_name = f"open_spiel_{open_spiel_game_name}"
 # TODO
-agents_to_run = [random_agent] * (game.num_players() + 1)
+agents_to_run = ["random"] * game.num_players() + ["game_master"]
 output_html_file = f"{environment_name}_game_replay.html"
 replay_width = 500
 replay_height = 450
