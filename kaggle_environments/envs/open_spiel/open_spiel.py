@@ -1,23 +1,18 @@
-# envs/open_spiel/open_spiel.py
-# Copyright 2025 Kaggle Inc
-# (Your license header)
+"""Kaggle environment wrapper for OpenSpiel games."""
 
-import json
-import os
 import copy
 import random
-import sys
 from typing import Any
-import numpy as np
-import pyspiel
+
 from kaggle_environments import core
 from kaggle_environments import utils
+import numpy as np
+import pyspiel
 
 
 DEFAULT_ACT_TIMEOUT = 5
 DEFAULT_RUN_TIMEOUT = 1200
-MAX_LEN_THRESHOLD = 5000  # Used for description only
-DEFAULT_EPISODE_STEPS = 1000  # Fallback max steps if game max_len is 0 or very large
+DEFAULT_EPISODE_STEP_BUFFER = 100  # To account for timeouts, retrys, etc...
 
 BASE_SPEC_TEMPLATE = {
     "name": "PLACEHOLDER_NAME",
@@ -55,7 +50,7 @@ BASE_SPEC_TEMPLATE = {
                 "description": "String representation of state.",
                 "type": "string"
             },
-            # TODO add legal action strings
+            # TODO(jhtschultz): add legal action strings
             "legal_actions": {
                 "description": "List of OpenSpiel legal actions.",
                 "type": "array",
@@ -218,9 +213,9 @@ def interpreter(
         _OS_GLOBAL_STATE.apply_action(action_submitted)
         action_applied = action_submitted
       except Exception:  # pylint: disable=broad-exception-caught
-        kaggle_state[os_current_player].status = "ERROR"
+        kaggle_state[current_agent].status = "ERROR"
     else:
-      kaggle_state[os_current_player].status = "INVALID"
+      kaggle_state[current_agent].status = "INVALID"
   elif os_current_player == pyspiel.PlayerId.SIMULTANEOUS:
     raise NotImplementedError
   elif os_current_player == pyspiel.PlayerId.TERMINAL:
@@ -398,45 +393,22 @@ def _register_open_spiel_envs(
         game_type.provides_observation_string,
       ]):
         continue
-      num_players = game.num_players()
-      max_len = game.max_game_length() + 1000  # TODO
       game_spec = copy.deepcopy(BASE_SPEC_TEMPLATE)
       env_name = f"open_spiel_{short_name.replace('-', '_').replace('.', '_')}"
-
-      # Populate ONLY the fields defined in the minimal template
       game_spec["name"] = env_name
       game_spec["title"] = f"Open Spiel: {short_name}"
-      desc_range = f"{game_type.min_num_players}" + (
-          f"-{game_type.max_num_players}"
-          if game_type.min_num_players != game_type.max_num_players else "")
-      # TODO make template?
-      game_spec["description"] = f"""
-Kaggle env for OpenSpiel: {short_name}.
-Requires {num_players}.
-Supports: {desc_range}.
+      game_spec["description"] = """
+Kaggle environment wrapper for OpenSpiel games.
+For game implementation details see:
+https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
 """.strip()
-
-      # Handle chance nodes by adding agent.
-      num_players_actual = game.num_players()
-      num_agents_total = num_players_actual + 1
-      game_spec["agents"] = [num_agents_total]
-      game_spec["description"] = f"""
-Kaggle env for OpenSpiel: {short_name}.
-{num_players_actual} players + 1 chance agent.
-Supports range: {desc_range} players.
-""".strip()
-
-      # Set configuration defaults
-      # TODO
-      if 0 < max_len < MAX_LEN_THRESHOLD:
-        episode_steps = max_len
-      else:
-        episode_steps = DEFAULT_EPISODE_STEPS
-      # TODO why setting defaults?
-      game_spec["configuration"]["episodeSteps"] = episode_steps
+      # Extra game master agent for handling chance nodes.
+      game_spec["agents"] = [game.num_players() + 1]
+      game_spec["configuration"]["episodeSteps"] = (
+          game.max_history_length() + DEFAULT_EPISODE_STEP_BUFFER
+      )
       game_spec["configuration"]["openSpielGameString"]["default"] = str(game)
       game_spec["configuration"]["openSpielGameName"]["default"] = short_name
-      # Set observation default (can still be useful for generic agents)
       game_spec["observation"]["properties"]["openSpielGameString"][
           "default"] = str(game)
       game_spec["observation"]["properties"]["openSpielGameName"][
