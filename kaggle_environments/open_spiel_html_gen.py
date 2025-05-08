@@ -33,6 +33,7 @@ def _pprint_state(state):
 
 print(f"Setting up environment: '{environment_name}'")
 env = make(environment_name, debug=debug_mode)
+
 #_pprint_state(env.state)
 #for _ in range(5):
 #    agent_actions = [random_agent(env.state[i].observation) for i in range(len(agents))]
