@@ -103,7 +103,7 @@ _OS_GLOBAL_GAME = None
 _OS_GLOBAL_STATE = None
 
 
-def _get_open_spiel_game(env_config: dict) -> pyspiel.Game:
+def _get_open_spiel_game(env_config: utils.Struct) -> pyspiel.Game:
   global _OS_GLOBAL_GAME
   game_string = env_config.get("openSpielGameString")
   if game_string == str(_OS_GLOBAL_GAME):
@@ -299,7 +299,7 @@ def interpreter(
   return kaggle_state
 
 
-def renderer(state, env):
+def renderer(state: list[utils.Struct], env: core.Environment) -> str:
   """Kaggle renderer function."""
   try:
     obs_str = state[-1].observation["observation_string"]
@@ -381,13 +381,15 @@ agents = {
   "random": random_agent,
 }
 
-def _register_open_spiel_envs() -> dict[str, Any]:
+def _register_open_spiel_envs(
+  games_list: list[str] | None = None,
+) -> dict[str, Any]:
   successfully_loaded_games = []
   skipped_games = []
   registered_envs = {}
-  for game_info in pyspiel.registered_games():
-    short_name = game_info.short_name
-    long_name = game_info.long_name
+  if games_list is None:
+    games_list = pyspiel.registered_names()
+  for short_name in games_list:
     try:
       game = pyspiel.load_game(short_name)
       game_type = game.get_type()
@@ -403,13 +405,13 @@ def _register_open_spiel_envs() -> dict[str, Any]:
 
       # Populate ONLY the fields defined in the minimal template
       game_spec["name"] = env_name
-      game_spec["title"] = f"OpenSpiel: {long_name}"
-      desc_range = f"{game_info.min_num_players}" + (
-          f"-{game_info.max_num_players}"
-          if game_info.min_num_players != game_info.max_num_players else "")
+      game_spec["title"] = f"Open Spiel: {short_name}"
+      desc_range = f"{game_type.min_num_players}" + (
+          f"-{game_type.max_num_players}"
+          if game_type.min_num_players != game_type.max_num_players else "")
       # TODO make template?
       game_spec["description"] = f"""
-Kaggle env for OpenSpiel: {long_name} ({short_name}).
+Kaggle env for OpenSpiel: {short_name}.
 Requires {num_players}.
 Supports: {desc_range}.
 """.strip()
@@ -419,7 +421,7 @@ Supports: {desc_range}.
       num_agents_total = num_players_actual + 1
       game_spec["agents"] = [num_agents_total]
       game_spec["description"] = f"""
-Kaggle env for OpenSpiel: {long_name} ({short_name}).
+Kaggle env for OpenSpiel: {short_name}.
 {num_players_actual} players + 1 chance agent.
 Supports range: {desc_range} players.
 """.strip()
