@@ -364,8 +364,8 @@ def _get_html_renderer_content(
   Tries to load a custom JS renderer for the game.
   Falls back to the default renderer if not found or on error.
   """
-  if "proxy" not in open_spiel_short_name:
-    return default_renderer_func()
+  #if "proxy" not in open_spiel_short_name:
+  #  return default_renderer_func()
   sanitized_game_name = open_spiel_short_name.replace('-', '_').replace('.', '_')
   sanitized_game_name = sanitized_game_name.removesuffix("_proxy")
   custom_renderer_js_path = (
@@ -382,7 +382,7 @@ def _get_html_renderer_content(
       return content
     except Exception as e_render:
       pass
-      #print(f"WARNING: Failed to load custom HTML renderer for {open_spiel_short_name} from {custom_renderer_js_path}. Error: {e_render}. Using default.")
+      print(f"WARNING: Failed to load custom HTML renderer for {open_spiel_short_name} from {custom_renderer_js_path}. Error: {e_render}. Using default.")
   return default_renderer_func()
 
 
@@ -542,4 +542,4 @@ OpenSpiel games skipped: {len(skipped_games)}.
   return registered_envs
 
 
-registered_open_spiel_envs = _register_open_spiel_envs(['connect_four_proxy'])
+registered_open_spiel_envs = _register_open_spiel_envs(['chess'])

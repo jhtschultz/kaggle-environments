@@ -15,7 +15,7 @@ def random_agent(observation):
 agents = [random_agent] * 3
 
 # --- Configuration ---
-open_spiel_game_name = "connect_four_proxy"
+open_spiel_game_name = "chess"
 game = pyspiel.load_game(open_spiel_game_name)
 environment_name = f"open_spiel_{open_spiel_game_name}"
 agents_to_run = ["random"] * game.num_players() + ["game_master"]
