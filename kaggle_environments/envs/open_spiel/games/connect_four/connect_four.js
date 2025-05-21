@@ -1,311 +1,327 @@
-// --- Constants ---
-const DEFAULT_NUM_ROWS = 6;
-const DEFAULT_NUM_COLS = 7;
-const PLAYER_X_CLASS = 'player-x';
-const PLAYER_O_CLASS = 'player-o';
-
-// --- Global state for renderer elements (to avoid recreating them) ---
-let boardElement = null;
-let statusTextElement = null;
-let winnerTextElement = null;
-let messageBoxElement = null;
-let rendererContainer = null;
-let titleElement = null;
-
-// --- Helper to show messages ---
-function showMessage(message, type = 'info', duration = 3000) {
-    if (!messageBoxElement && document.body) { // Create if doesn't exist and body is available
-        messageBoxElement = document.createElement('div');
-        messageBoxElement.id = 'messageBox'; // Assign an ID for potential future reference
-        // Apply styling for the message box (should match CSS from the HTML version)
-        messageBoxElement.style.position = 'fixed';
-        messageBoxElement.style.top = '10px';
-        messageBoxElement.style.left = '50%';
-        messageBoxElement.style.transform = 'translateX(-50%)';
-        messageBoxElement.style.padding = '0.75rem 1rem';
-        messageBoxElement.style.borderRadius = '0.375rem';
-        messageBoxElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        messageBoxElement.style.zIndex = '1000';
-        messageBoxElement.style.opacity = '0';
-        messageBoxElement.style.transition = 'opacity 0.3s ease-in-out, background-color 0.3s';
-        messageBoxElement.style.fontSize = '0.875rem';
-        messageBoxElement.style.fontFamily = "'Inter', sans-serif"; // Match body font
-        document.body.appendChild(messageBoxElement);
-    }
-
-    if (messageBoxElement) {
-        messageBoxElement.textContent = message;
-        // Basic styling reset and application
-        messageBoxElement.style.backgroundColor = type === 'error' ? '#ef4444' : '#10b981'; // red-500 or green-500
-        messageBoxElement.style.color = 'white';
-        messageBoxElement.style.opacity = '1'; // Show
-        setTimeout(() => {
-            if (messageBoxElement) messageBoxElement.style.opacity = '0'; // Hide
-        }, duration);
-    } else {
-        // Fallback if messageBoxElement couldn't be created (e.g., document.body not ready)
-        console.log(`ConnectFourRenderer (${type}): ${message}`);
-    }
-}
-
-// --- DOM Manipulation ---
-function ensureRendererElements(parentElement, rows, cols) {
-    if (!parentElement) {
-        console.error("ConnectFourRenderer: Parent element is null. Cannot create renderer elements.");
-        return false;
-    }
-
-    if (!rendererContainer) {
-        parentElement.innerHTML = ''; // Clear the parent element only once
-
-        rendererContainer = document.createElement('div');
-        // Styles for rendererContainer (mimicking Tailwind classes)
-        rendererContainer.style.display = 'flex';
-        rendererContainer.style.flexDirection = 'column';
-        rendererContainer.style.alignItems = 'center';
-        rendererContainer.style.padding = '20px';
-        rendererContainer.style.boxSizing = 'border-box';
-        rendererContainer.style.width = '100%';
-        rendererContainer.style.height = '100%';
-        rendererContainer.style.fontFamily = "'Inter', sans-serif";
-
-
-        titleElement = document.createElement('h1');
-        // Styles for titleElement
-        titleElement.textContent = 'Connect Four';
-        titleElement.style.fontSize = '1.875rem'; // text-3xl
-        titleElement.style.fontWeight = 'bold';
-        titleElement.style.marginBottom = '1rem'; // mb-4
-        titleElement.style.textAlign = 'center';
-        titleElement.style.color = '#2563eb'; // blue-600
-        rendererContainer.appendChild(titleElement);
-
-        boardElement = document.createElement('div');
-        // Styles for boardElement
-        boardElement.style.backgroundColor = '#3b82f6'; // blue-500
-        boardElement.style.padding = '10px';
-        boardElement.style.borderRadius = '10px';
-        boardElement.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
-        boardElement.style.display = 'grid';
-        boardElement.style.gap = '5px';
-        boardElement.style.width = 'auto';
-        boardElement.style.maxWidth = '90vw';
-        boardElement.style.maxHeight = 'calc(90vh - 120px)';
-        boardElement.style.aspectRatio = `${cols} / ${rows}`;
-        boardElement.style.marginBottom = '20px';
-        rendererContainer.appendChild(boardElement);
-
-        const statusContainer = document.createElement('div');
-        // Styles for statusContainer
-        statusContainer.style.padding = '10px 15px';
-        statusContainer.style.backgroundColor = 'white';
-        statusContainer.style.borderRadius = '8px';
-        statusContainer.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
-        statusContainer.style.textAlign = 'center';
-        statusContainer.style.width = 'auto';
-        statusContainer.style.maxWidth = '90vw';
-
-        statusTextElement = document.createElement('p');
-        // Styles for statusTextElement
-        statusTextElement.style.fontSize = '1.1rem';
-        statusTextElement.style.fontWeight = '600';
-
-        winnerTextElement = document.createElement('p');
-        // Styles for winnerTextElement
-        winnerTextElement.style.fontSize = '1.25rem';
-        winnerTextElement.style.fontWeight = '700';
-        winnerTextElement.style.marginTop = '5px';
-
-        statusContainer.appendChild(statusTextElement);
-        statusContainer.appendChild(winnerTextElement);
-        rendererContainer.appendChild(statusContainer);
-
-        parentElement.appendChild(rendererContainer);
-    }
-
-    if (boardElement.children.length !== rows * cols ||
-        boardElement.style.gridTemplateColumns !== `repeat(${cols}, 1fr)` ||
-        boardElement.style.gridTemplateRows !== `repeat(${rows}, 1fr)`) {
-        boardElement.innerHTML = '';
-        boardElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-        boardElement.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const cell = document.createElement('div');
-                // Styles for cell
-                cell.style.backgroundColor = '#f3f4f6'; // gray-100 (empty)
-                cell.style.borderRadius = '50%';
-                cell.style.display = 'flex';
-                cell.style.alignItems = 'center';
-                cell.style.justifyContent = 'center';
-                cell.style.transition = 'background-color 0.3s';
-                // Cell width/height will be determined by the grid
-                boardElement.appendChild(cell);
-            }
-        }
-    }
-    // Ensure message box is created (it's appended to body, so check separately)
-    if (!messageBoxElement && document.body) {
-        showMessage("Renderer initialized."); // Call showMessage to create it
-    }
-    return true;
-}
-
-function renderBoardDisplay(gameState, rows, cols) {
-    if (!boardElement || !statusTextElement || !winnerTextElement) {
-        console.error("ConnectFourRenderer: Renderer DOM elements not initialized.");
-        return;
-    }
-    if (!gameState || typeof gameState.board !== 'object') {
-        console.error("ConnectFourRenderer: Invalid gameState or board data", gameState);
-        showMessage("Error: Could not load board data. Ensure 'board' is an array.", 'error');
-        statusTextElement.textContent = "Error loading game state.";
-        return;
-    }
-
-    const { board, current_player, is_terminal, winner } = gameState;
-    const cells = boardElement.children;
-
-    if (cells.length !== rows * cols) {
-        console.error("ConnectFourRenderer: Cell count mismatch. Re-initialization might be needed.");
-        return;
-    }
-
-    for (let r_json = 0; r_json < rows; r_json++) {
-        const jsonRow = board[r_json];
-        if (!jsonRow || jsonRow.length !== cols) {
-            console.warn(`ConnectFourRenderer: Invalid row data at JSON row index ${r_json}:`, jsonRow);
-            const r_visual = (rows - 1) - r_json;
-            for (let c_fill = 0; c_fill < cols; c_fill++) {
-                const cellIndex = r_visual * cols + c_fill;
-                if(cells[cellIndex]) {
-                    cells[cellIndex].style.backgroundColor = '#f3f4f6'; // Reset to empty
-                }
-            }
-            continue;
-        }
-        const r_visual = (rows - 1) - r_json;
-        for (let c_json = 0; c_json < cols; c_json++) {
-            const cellValue = jsonRow[c_json];
-            const cellIndex = r_visual * cols + c_json;
-            const cellElement = cells[cellIndex];
-
-            if (!cellElement) continue;
-
-            // Reset to empty cell color first
-            cellElement.style.backgroundColor = '#f3f4f6'; // gray-100
-
-            if (cellValue === 'x' || cellValue === 'X') {
-                cellElement.style.backgroundColor = '#ef4444'; // red-500
-            } else if (cellValue === 'o' || cellValue === 'O') {
-                cellElement.style.backgroundColor = '#facc15'; // yellow-400
-            }
-        }
-    }
-
-    statusTextElement.textContent = '';
-    winnerTextElement.textContent = '';
-    // Clear existing spans if any
-    statusTextElement.innerHTML = '';
-    winnerTextElement.innerHTML = '';
-
-
-    if (is_terminal) {
-        statusTextElement.textContent = "Game Over!";
-        if (winner) {
-            if (String(winner).toLowerCase() === 'draw') {
-                winnerTextElement.textContent = "It's a Draw!";
-            } else {
-                const winnerDisplay = String(winner).toUpperCase();
-                const playerColor = String(winner).toLowerCase() === 'x' ? '#ef4444' : '#ca8a04';
-                winnerTextElement.innerHTML = `Player <span style="color: ${playerColor}; font-weight: bold;">${winnerDisplay}</span> Wins!`;
-            }
-        } else {
-             winnerTextElement.textContent = "Game ended.";
-        }
-    } else {
-        if (current_player) {
-            const playerDisplay = String(current_player).toUpperCase();
-            const playerColor = String(current_player).toLowerCase() === 'x' ? '#ef4444' : '#ca8a04';
-            statusTextElement.innerHTML = `Current Player: <span style="color: ${playerColor}; font-weight: bold;">${playerDisplay}</span>`;
-        } else {
-            statusTextElement.textContent = "Waiting for player...";
-        }
-    }
-}
-
-// --- Main Renderer Function (Kaggle Environment Interface) ---
+// The ENTIRE content of this file is this one function.
 function renderer(options) {
     const { environment, step, parent, interactive, isInteractive } = options;
 
-    if (!environment || !environment.steps || !environment.steps[step] ||
-        !environment.steps[step][0] || !environment.steps[step][0].observation) {
-        console.error("ConnectFourRenderer: Invalid environment structure or step data:", options);
-        // Attempt to display error in parent if possible, otherwise log
-        if (parent && typeof parent.innerHTML !== 'undefined') {
-            parent.innerHTML = "<p style='color:red; font-family: sans-serif;'>Error: Invalid environment data received by renderer.</p>";
+    // --- Constants ---
+    const DEFAULT_NUM_ROWS = 6;
+    const DEFAULT_NUM_COLS = 7;
+    const PLAYER_SYMBOLS = ['O', 'X']; // O: Player 0 (Yellow), X: Player 1 (Red)
+    const PLAYER_COLORS = ['#facc15', '#ef4444']; // Yellow for 'O', Red for 'X'
+    const EMPTY_CELL_COLOR = '#e5e7eb'; 
+    const BOARD_COLOR = '#3b82f6';      
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const CELL_UNIT_SIZE = 100; 
+    const CIRCLE_RADIUS = CELL_UNIT_SIZE * 0.42; 
+    const SVG_VIEWBOX_WIDTH = DEFAULT_NUM_COLS * CELL_UNIT_SIZE;
+    const SVG_VIEWBOX_HEIGHT = DEFAULT_NUM_ROWS * CELL_UNIT_SIZE;
+
+    let currentBoardSvgElement = null; 
+    let currentStatusTextElement = null;
+    let currentWinnerTextElement = null;
+    let currentMessageBoxElement = typeof document !== 'undefined' ? document.getElementById('messageBox') : null;
+    let currentRendererContainer = null;
+    let currentTitleElement = null;
+
+    function _showMessage(message, type = 'info', duration = 3000) {
+        // ... (showMessage function remains the same)
+        if (typeof document === 'undefined' || !document.body) return;
+        if (!currentMessageBoxElement) {
+            currentMessageBoxElement = document.createElement('div');
+            currentMessageBoxElement.id = 'messageBox';
+            currentMessageBoxElement.style.position = 'fixed';
+            currentMessageBoxElement.style.top = '10px';
+            currentMessageBoxElement.style.left = '50%';
+            currentMessageBoxElement.style.transform = 'translateX(-50%)';
+            currentMessageBoxElement.style.padding = '0.75rem 1rem';
+            currentMessageBoxElement.style.borderRadius = '0.375rem';
+            currentMessageBoxElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            currentMessageBoxElement.style.zIndex = '1000';
+            currentMessageBoxElement.style.opacity = '0';
+            currentMessageBoxElement.style.transition = 'opacity 0.3s ease-in-out, background-color 0.3s';
+            currentMessageBoxElement.style.fontSize = '0.875rem';
+            currentMessageBoxElement.style.fontFamily = "'Inter', sans-serif";
+            document.body.appendChild(currentMessageBoxElement);
         }
-        return;
+        currentMessageBoxElement.textContent = message;
+        currentMessageBoxElement.style.backgroundColor = type === 'error' ? '#ef4444' : '#10b981';
+        currentMessageBoxElement.style.color = 'white';
+        currentMessageBoxElement.style.opacity = '1';
+        setTimeout(() => { if (currentMessageBoxElement) currentMessageBoxElement.style.opacity = '0'; }, duration);
     }
 
-    // For this OpenSpiel Connect Four, dimensions are fixed.
-    const rows = DEFAULT_NUM_ROWS;
-    const cols = DEFAULT_NUM_COLS;
+    function _ensureRendererElements(parentElementToClear, rows, cols) {
+        // ... (_ensureRendererElements function remains largely the same)
+        if (!parentElementToClear) return false;
+        parentElementToClear.innerHTML = ''; 
 
-    if (!ensureRendererElements(parent, rows, cols)) {
-        // If parent was null and we couldn't create elements, bail.
-        return;
+        currentRendererContainer = document.createElement('div');
+        // ... (container setup)
+        currentRendererContainer.style.display = 'flex';
+        currentRendererContainer.style.flexDirection = 'column';
+        currentRendererContainer.style.alignItems = 'center';
+        currentRendererContainer.style.padding = '20px';
+        currentRendererContainer.style.boxSizing = 'border-box';
+        currentRendererContainer.style.width = '100%';
+        currentRendererContainer.style.height = '100%';
+        currentRendererContainer.style.fontFamily = "'Inter', sans-serif";
+
+        currentTitleElement = document.createElement('h1');
+        // ... (title setup)
+        currentTitleElement.textContent = 'Connect Four';
+        currentTitleElement.style.fontSize = '1.875rem';
+        currentTitleElement.style.fontWeight = 'bold';
+        currentTitleElement.style.marginBottom = '1rem';
+        currentTitleElement.style.textAlign = 'center';
+        currentTitleElement.style.color = '#2563eb';
+        currentRendererContainer.appendChild(currentTitleElement);
+
+        currentBoardSvgElement = document.createElementNS(SVG_NS, "svg");
+        currentBoardSvgElement.setAttribute("viewBox", `0 0 ${SVG_VIEWBOX_WIDTH} ${SVG_VIEWBOX_HEIGHT}`);
+        currentBoardSvgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        currentBoardSvgElement.style.width = "auto"; 
+        currentBoardSvgElement.style.maxWidth = "500px"; 
+        currentBoardSvgElement.style.maxHeight = `calc(100vh - 200px)`; 
+        currentBoardSvgElement.style.aspectRatio = `${cols} / ${rows}`;
+        currentBoardSvgElement.style.display = "block"; 
+        currentBoardSvgElement.style.margin = "0 auto 20px auto"; 
+
+        const boardBgRect = document.createElementNS(SVG_NS, "rect");
+        boardBgRect.setAttribute("x", "0");
+        boardBgRect.setAttribute("y", "0");
+        boardBgRect.setAttribute("width", SVG_VIEWBOX_WIDTH.toString());
+        boardBgRect.setAttribute("height", SVG_VIEWBOX_HEIGHT.toString());
+        boardBgRect.setAttribute("fill", BOARD_COLOR);
+        boardBgRect.setAttribute("rx", (CELL_UNIT_SIZE * 0.1).toString()); 
+        currentBoardSvgElement.appendChild(boardBgRect);
+
+        // SVG Circles are created with (0,0) being top-left visual circle
+        for (let r_visual = 0; r_visual < rows; r_visual++) {
+            for (let c_visual = 0; c_visual < cols; c_visual++) {
+                const circle = document.createElementNS(SVG_NS, "circle");
+                const cx = c_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
+                const cy = r_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
+                circle.setAttribute("id", `cell-${r_visual}-${c_visual}`); // ID based on visual row/col
+                circle.setAttribute("cx", cx.toString());
+                circle.setAttribute("cy", cy.toString());
+                circle.setAttribute("r", CIRCLE_RADIUS.toString());
+                circle.setAttribute("fill", EMPTY_CELL_COLOR);
+                currentBoardSvgElement.appendChild(circle);
+            }
+        }
+        currentRendererContainer.appendChild(currentBoardSvgElement);
+
+        const statusContainer = document.createElement('div');
+        // ... (statusContainer setup)
+        statusContainer.style.padding = '10px 15px';
+        statusContainer.style.backgroundColor = 'white';
+        statusContainer.style.borderRadius = '8px';
+        statusContainer.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)';
+        statusContainer.style.textAlign = 'center';
+        statusContainer.style.width = 'auto';
+        statusContainer.style.minWidth = '200px'; 
+        statusContainer.style.maxWidth = '90vw';
+        currentRendererContainer.appendChild(statusContainer);
+
+        currentStatusTextElement = document.createElement('p');
+        // ... (currentStatusTextElement setup)
+        currentStatusTextElement.style.fontSize = '1.1rem';
+        currentStatusTextElement.style.fontWeight = '600';
+        currentStatusTextElement.style.margin = '0 0 5px 0';
+        statusContainer.appendChild(currentStatusTextElement);
+        
+        currentWinnerTextElement = document.createElement('p');
+        // ... (currentWinnerTextElement setup)
+        currentWinnerTextElement.style.fontSize = '1.25rem';
+        currentWinnerTextElement.style.fontWeight = '700';
+        currentWinnerTextElement.style.margin = '5px 0 0 0';
+        statusContainer.appendChild(currentWinnerTextElement);
+        
+        parentElementToClear.appendChild(currentRendererContainer);
+        
+        if (typeof document !== 'undefined' && !document.body.hasAttribute('data-renderer-initialized')) {
+             _showMessage("Renderer initialized (SVG).", "info", 1500);
+             document.body.setAttribute('data-renderer-initialized', 'true');
+        }
+        return true;
     }
 
-    let gameSpecificState;
-    const observation = environment.steps[step][0].observation;
+    function _renderBoardDisplay_svg(gameStateToDisplay, displayRows, displayCols) {
+        if (!currentBoardSvgElement || !currentStatusTextElement || !currentWinnerTextElement) return;
 
-    if (observation && typeof observation.json === 'string') {
-        try {
-            gameSpecificState = JSON.parse(observation.json);
-        } catch (e) {
-            console.error("ConnectFourRenderer: Failed to parse game state JSON from observation.json:", e, observation.json);
-            showMessage("Error: Invalid game state format (observation.json).", 'error');
-            if (statusTextElement) statusTextElement.textContent = "Error: Invalid game state format.";
+        if (!gameStateToDisplay || typeof gameStateToDisplay.board !== 'object' || !Array.isArray(gameStateToDisplay.board) || gameStateToDisplay.board.length === 0) {
+            currentStatusTextElement.textContent = "Waiting for game data...";
+            currentWinnerTextElement.textContent = "";
+            for (let r_visual = 0; r_visual < displayRows; r_visual++) {
+                for (let c_visual = 0; c_visual < displayCols; c_visual++) {
+                    const circleElement = currentBoardSvgElement.querySelector(`#cell-${r_visual}-${c_visual}`);
+                    if (circleElement) {
+                        circleElement.setAttribute("fill", EMPTY_CELL_COLOR);
+                    }
+                }
+            }
             return;
         }
-    } else if (observation && typeof observation.board === 'object') {
-        // If the observation itself is the parsed JSON structure from the proxy
-        gameSpecificState = observation;
-    } else {
-        console.error("ConnectFourRenderer: Game state JSON not found in observation.json or observation.board.", observation);
-        showMessage("Error: Game state data not found.", 'error');
-        if (statusTextElement) statusTextElement.textContent = "Error: Game state data not found.";
+
+        const { board, current_player, is_terminal, winner } = gameStateToDisplay;
+
+        // Iterate through the board data (board[r_data][c_data])
+        // board[0] is the first row in the JSON, conventionally the TOP row of data.
+        // For Connect Four, pieces stack from the bottom.
+        // So, board[0] (top data row) should be displayed at the visual BOTTOM if pieces fall.
+        // OR, if board[0] data actually IS the visual top row (where pieces are if column is full),
+        // and "upside down" means pieces are hanging at the top instead of stacking at the bottom,
+        // we need to map board[r_data] (data row) to the correct visual SVG row.
+        
+        // If board data `board[r_data]` corresponds to visual row `r_data` (0=top),
+        // and pieces are stacking from the "top" of the data array downwards,
+        // then to display correctly (pieces at bottom), data row `r_data`
+        // must be mapped to visual SVG row `(displayRows - 1) - r_data`.
+
+        for (let r_data = 0; r_data < displayRows; r_data++) { // r_data iterates through rows of `board`
+            const dataRow = board[r_data]; 
+            if (!dataRow || !Array.isArray(dataRow) || dataRow.length !== displayCols) {
+                // Error handling for malformed row
+                for (let c_fill = 0; c_fill < displayCols; c_fill++) {
+                    // Determine visual row for error display. If r_data=0 is top data,
+                    // and we want to flip, then this error is for visual row (displayRows-1)-0.
+                    const visual_row_for_error = (displayRows - 1) - r_data;
+                    const circleElement = currentBoardSvgElement.querySelector(`#cell-${visual_row_for_error}-${c_fill}`);
+                    if (circleElement) circleElement.setAttribute("fill", '#FF00FF'); // Magenta for error
+                }
+                continue;
+            }
+
+            // This is the crucial change for "upside down" board:
+            // Map the data row index (r_data) to the visual SVG row index.
+            // If board[0] (from JSON) should be at the bottom of the visual display:
+            const visual_svg_row_index = (displayRows - 1) - r_data;
+            // If board[0] (from JSON) IS the top of the visual display (current state):
+            // const visual_svg_row_index = r_data; // Keep this if the previous state was correct data-wise
+
+            for (let c_data = 0; c_data < displayCols; c_data++) { // c_data iterates through columns of `board[r_data]`
+                const originalCellValue = dataRow[c_data];
+                const cellValueForComparison = String(originalCellValue).trim().toLowerCase();
+                
+                // The column index for SVG is the same as c_data
+                const visual_svg_col_index = c_data;
+                const circleElement = currentBoardSvgElement.querySelector(`#cell-${visual_svg_row_index}-${visual_svg_col_index}`);
+                
+                if (!circleElement) continue;
+                
+                let fillColor = EMPTY_CELL_COLOR;
+                if (cellValueForComparison === "o") { 
+                    fillColor = PLAYER_COLORS[0]; // Yellow
+                } else if (cellValueForComparison === "x") { 
+                    fillColor = PLAYER_COLORS[1]; // Red
+                }
+                circleElement.setAttribute("fill", fillColor);
+            }
+        }
+
+        // Status and Winner display (remains the same)
+        currentStatusTextElement.innerHTML = ''; /* ... */
+        currentWinnerTextElement.innerHTML = ''; /* ... */
+        // (The status display logic from before is fine, keeping it concise here)
+        if (is_terminal) {
+            currentStatusTextElement.textContent = "Game Over!";
+            if (winner !== null && winner !== undefined) {
+                if (String(winner).toLowerCase() === 'draw') {
+                    currentWinnerTextElement.textContent = "It's a Draw!";
+                } else {
+                    let winnerSymbolDisplay, winnerColorDisplay;
+                    if (String(winner).toLowerCase() === "o") {
+                        winnerSymbolDisplay = PLAYER_SYMBOLS[0]; 
+                        winnerColorDisplay = PLAYER_COLORS[0];   
+                    } else if (String(winner).toLowerCase() === "x") {
+                        winnerSymbolDisplay = PLAYER_SYMBOLS[1]; 
+                        winnerColorDisplay = PLAYER_COLORS[1];   
+                    }
+                    if (winnerSymbolDisplay) {
+                         currentWinnerTextElement.innerHTML = `Player <span style="color: ${winnerColorDisplay}; font-weight: bold;">${winnerSymbolDisplay}</span> Wins!`;
+                    } else {
+                        currentWinnerTextElement.textContent = `Winner: ${String(winner).toUpperCase()}`; 
+                    }
+                }
+            } else { currentWinnerTextElement.textContent = "Game ended."; }
+        } else { 
+            let playerSymbolToDisplay, playerColorToDisplay;
+            if (String(current_player).toLowerCase() === "o") {
+                playerSymbolToDisplay = PLAYER_SYMBOLS[0]; 
+                playerColorToDisplay = PLAYER_COLORS[0];   
+            } else if (String(current_player).toLowerCase() === "x") {
+                playerSymbolToDisplay = PLAYER_SYMBOLS[1]; 
+                playerColorToDisplay = PLAYER_COLORS[1];   
+            }
+            if (playerSymbolToDisplay) {
+                currentStatusTextElement.innerHTML = `Current Player: <span style="color: ${playerColorToDisplay}; font-weight: bold;">${playerSymbolToDisplay}</span>`;
+            } else {
+                currentStatusTextElement.textContent = "Waiting for player...";
+            }
+        }
+    }
+
+    // --- Main execution logic ---
+    // ... (Main logic remains the same, calling _renderBoardDisplay_svg)
+    if (!_ensureRendererElements(parent, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS)) {
+        if (parent && typeof parent.innerHTML !== 'undefined') {
+            parent.innerHTML = "<p style='color:red; font-family: sans-serif;'>Critical Error: Renderer element setup failed.</p>";
+        }
+        return;
+    }
+    
+    if (!environment || !environment.steps || !environment.steps[step]) {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS); 
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Initializing environment...";
         return;
     }
 
-    renderBoardDisplay(gameSpecificState, rows, cols);
+    const currentStepAgents = environment.steps[step];
+    if (!currentStepAgents || !Array.isArray(currentStepAgents) || currentStepAgents.length === 0) {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Waiting for agent data...";
+        return;
+    }
+    
+    const gameMasterAgentIndex = currentStepAgents.length - 1;
+    const gameMasterAgent = currentStepAgents[gameMasterAgentIndex];
 
-    // Interactive part (not used for display, but good to keep structure)
-    // Example: if you had a canvas for clicks
-    // if (interactive && parent.querySelector("canvas")) {
-    //    parent.querySelector("canvas").style.cursor = isInteractive() ? "pointer" : "default";
-    // }
-}
+    if (!gameMasterAgent || typeof gameMasterAgent.observation === 'undefined') {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Waiting for observation data...";
+        return;
+    }
+    const observationForRenderer = gameMasterAgent.observation;
 
-// --- Post Ready Message ---
-// Inform the parent that the renderer is ready to receive messages/calls.
-if (window.parent !== window) {
-    window.parent.postMessage({ type: "rendererReady" }, "*");
-} else {
-    // Standalone mode (e.g. if you open the JS file directly in a test HTML page)
-    console.log("Connect Four Renderer: Standalone mode. Call renderer(options) with test data.");
-    // For a quick visual check in a test HTML, you might do:
-    // document.addEventListener('DOMContentLoaded', () => {
-    //     if (ensureRendererElements(document.body, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS)) {
-    //          renderBoardDisplay({
-    //             board: Array(DEFAULT_NUM_ROWS).fill(null).map(() => Array(DEFAULT_NUM_COLS).fill('.')),
-    //             current_player: 'x',
-    //             is_terminal: false,
-    //             winner: null
-    //         }, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
-    //         if(statusTextElement) statusTextElement.textContent = "Standalone mode. Initial empty board.";
-    //     }
-    // });
+    let gameSpecificState = null;
+
+    if (observationForRenderer && typeof observationForRenderer.observation_string === 'string' && observationForRenderer.observation_string.trim() !== '') {
+        try {
+            gameSpecificState = JSON.parse(observationForRenderer.observation_string);
+        } catch (e) {
+            _showMessage("Error: Corrupted game state (obs_string).", 'error');
+        }
+    }
+    
+    if (!gameSpecificState && observationForRenderer && typeof observationForRenderer.json === 'string' && observationForRenderer.json.trim() !== '') {
+        try {
+            gameSpecificState = JSON.parse(observationForRenderer.json);
+        } catch (e) {
+            _showMessage("Error: Corrupted game state (json).", 'error');
+        }
+    }
+    
+    if (!gameSpecificState && observationForRenderer && 
+        Array.isArray(observationForRenderer.board) && 
+        typeof observationForRenderer.current_player !== 'undefined'
+       ) {
+        if( (observationForRenderer.board.length === DEFAULT_NUM_ROWS &&
+             (observationForRenderer.board.length === 0 || 
+              (Array.isArray(observationForRenderer.board[0]) && observationForRenderer.board[0].length === DEFAULT_NUM_COLS)))
+          ){
+            gameSpecificState = observationForRenderer;
+        }
+    }
+    
+    _renderBoardDisplay_svg(gameSpecificState, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
 }

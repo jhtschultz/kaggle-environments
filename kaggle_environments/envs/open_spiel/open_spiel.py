@@ -3,13 +3,17 @@
 import copy
 import os
 import pathlib
+import os
+import pathlib
 import random
+from typing import Any, Callable
 from typing import Any, Callable
 
 from kaggle_environments import core
 from kaggle_environments import utils
 import numpy as np
 import pyspiel
+from .games.connect_four import connect_four_proxy
 from .games.connect_four import connect_four_proxy
 
 DEFAULT_ACT_TIMEOUT = 5
@@ -364,7 +368,10 @@ def _get_html_renderer_content(
   Tries to load a custom JS renderer for the game.
   Falls back to the default renderer if not found or on error.
   """
+  if "proxy" not in open_spiel_short_name:
+    return default_renderer_func()
   sanitized_game_name = open_spiel_short_name.replace('-', '_').replace('.', '_')
+  sanitized_game_name = sanitized_game_name.removesuffix("_proxy")
   custom_renderer_js_path = (
       base_path_for_custom_renderers /
       sanitized_game_name /
@@ -383,41 +390,41 @@ def _get_html_renderer_content(
   return default_renderer_func()
 
 
-def html_renderer():
-  """Provides the simplest possible HTML/JS renderer for OpenSpiel text observations."""
-  return """
-function renderer(context) {
-    const { parent, environment, step } = context;
-    parent.innerHTML = ''; // Clear previous rendering
-
-    // Get the current step's data
-    const currentStepData = environment.steps[step];
-    const numAgents = currentStepData.length
-    const gameMasterIndex = numAgents - 1
-    let obsString = "Observation not available for this step.";
-
-    // Try to get the raw observation string from the game master agent.
-    if (currentStepData && currentStepData[gameMasterIndex] && currentStepData[gameMasterIndex].observation && currentStepData[gameMasterIndex].observation.observation_string !== undefined) {
-        obsString = currentStepData[gameMasterIndex].observation.observation_string;
-    } else if (step === 0 && environment.steps[0] && environment.steps[0][gameMasterIndex] && environment.steps[0][gameMasterIndex].observation && environment.steps[0][gameMasterIndex].observation.observation_string !== undefined) {
-        // Fallback for initial state if current step data is missing
-        obsString = environment.steps[0][gameMasterIndex].observation.observation_string;
-    }
-
-    // Create a <pre> element to preserve formatting
-    const pre = document.createElement("pre");
-    pre.style.fontFamily = "monospace"; // Ensure monospace font
-    pre.style.margin = "10px";        // Add some padding
-    pre.style.border = "1px solid #ccc";
-    pre.style.padding = "5px";
-    pre.style.backgroundColor = "#f0f0f0";
-
-    // Set the text content (safer than innerHTML for plain text)
-    pre.textContent = `Step: ${step}\\n\\n${obsString}`; // Add step number for context
-
-    parent.appendChild(pre);
-}
-"""
+#def html_renderer():
+#  """Provides the simplest possible HTML/JS renderer for OpenSpiel text observations."""
+#  return """
+#function renderer(context) {
+#    const { parent, environment, step } = context;
+#    parent.innerHTML = ''; // Clear previous rendering
+#
+#    // Get the current step's data
+#    const currentStepData = environment.steps[step];
+#    const numAgents = currentStepData.length
+#    const gameMasterIndex = numAgents - 1
+#    let obsString = "Observation not available for this step.";
+#
+#    // Try to get the raw observation string from the game master agent.
+#    if (currentStepData && currentStepData[gameMasterIndex] && currentStepData[gameMasterIndex].observation && currentStepData[gameMasterIndex].observation.observation_string !== undefined) {
+#        obsString = currentStepData[gameMasterIndex].observation.observation_string;
+#    } else if (step === 0 && environment.steps[0] && environment.steps[0][gameMasterIndex] && environment.steps[0][gameMasterIndex].observation && environment.steps[0][gameMasterIndex].observation.observation_string !== undefined) {
+#        // Fallback for initial state if current step data is missing
+#        obsString = environment.steps[0][gameMasterIndex].observation.observation_string;
+#    }
+#
+#    // Create a <pre> element to preserve formatting
+#    const pre = document.createElement("pre");
+#    pre.style.fontFamily = "monospace"; // Ensure monospace font
+#    pre.style.margin = "10px";        // Add some padding
+#    pre.style.border = "1px solid #ccc";
+#    pre.style.padding = "5px";
+#    pre.style.backgroundColor = "#f0f0f0";
+#
+#    // Set the text content (safer than innerHTML for plain text)
+#    pre.textContent = `Step: ${step}\\n\\n${obsString}`; // Add step number for context
+#
+#    parent.appendChild(pre);
+#}
+#"""
 
 
 # --- Agents ---
@@ -463,6 +470,8 @@ def _register_open_spiel_envs(
   registered_envs = {}
   current_file_dir = pathlib.Path(__file__).parent.resolve()
   custom_renderers_base = current_file_dir / "games"
+  current_file_dir = pathlib.Path(__file__).parent.resolve()
+  custom_renderers_base = current_file_dir / "games"
   if games_list is None:
     games_list = pyspiel.registered_names()
   for short_name in games_list:
@@ -500,7 +509,12 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
           base_path_for_custom_renderers=custom_renderers_base,
           default_renderer_func=_default_html_renderer_js_content,
       )
-      html_renderer_callable = lambda content=js_string_content: content
+      #html_renderer_callable = lambda content=js_string_content: content
+      #print("*"*20)
+      #print(js_string_content)
+      #print("*"*20)
+      def html_renderer_callable():
+        return js_string_content
 
       registered_envs[env_name] = {
           "specification": game_spec,
@@ -508,12 +522,20 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
           "renderer": renderer,
           "html_renderer": html_renderer_callable,
           #"html_renderer": _default_html_renderer_js_content,
+          "html_renderer": html_renderer_callable,
+          #"html_renderer": _default_html_renderer_js_content,
           "agents": agents,
       }
       successfully_loaded_games.append(short_name)
 
     except Exception as e:  # pylint: disable=broad-exception-caught
+    except Exception as e:  # pylint: disable=broad-exception-caught
       skipped_games.append(short_name)
+      if "connect_four" in short_name:
+        print("="*20)
+        print(short_name)
+        print(e)
+        print("="*20)
       if "connect_four" in short_name:
         print("="*20)
         print(short_name)
@@ -529,4 +551,4 @@ OpenSpiel games skipped: {len(skipped_games)}.
   return registered_envs
 
 
-registered_open_spiel_envs = _register_open_spiel_envs()
+registered_open_spiel_envs = _register_open_spiel_envs(['connect_four_proxy'])
