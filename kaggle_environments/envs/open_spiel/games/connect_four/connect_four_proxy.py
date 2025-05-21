@@ -21,7 +21,7 @@ class ConnectFourState(proxy.State):
       raise ValueError(f'Invalid player: {player}')
 
   def state_dict(self) -> dict[str, Any]:
-    rows = reversed(str(self).strip().split('\n'))  # row 0 is now bottom row
+    rows = reversed(self.to_string().strip().split('\n'))  # row 0 is now bottom row
     board = [list(row) for row in rows]
     winner = None
     if self.is_terminal():
@@ -55,11 +55,13 @@ class ConnectFourState(proxy.State):
     return self.dict_to_action(action_dict)
 
   def observation_string(self, player: int) -> str:
-    del player
-    return str(self)
+    return self.observation_json(player)
 
   def observation_json(self, player: int) -> str:
     del player
+    return self.to_json()
+
+  def __str__(self):
     return self.to_json()
 
 
