@@ -3,17 +3,13 @@
 import copy
 import os
 import pathlib
-import os
-import pathlib
 import random
-from typing import Any, Callable
 from typing import Any, Callable
 
 from kaggle_environments import core
 from kaggle_environments import utils
 import numpy as np
 import pyspiel
-from .games.connect_four import connect_four_proxy
 from .games.connect_four import connect_four_proxy
 
 DEFAULT_ACT_TIMEOUT = 5
@@ -470,8 +466,6 @@ def _register_open_spiel_envs(
   registered_envs = {}
   current_file_dir = pathlib.Path(__file__).parent.resolve()
   custom_renderers_base = current_file_dir / "games"
-  current_file_dir = pathlib.Path(__file__).parent.resolve()
-  custom_renderers_base = current_file_dir / "games"
   if games_list is None:
     games_list = pyspiel.registered_names()
   for short_name in games_list:
@@ -522,13 +516,10 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
           "renderer": renderer,
           "html_renderer": html_renderer_callable,
           #"html_renderer": _default_html_renderer_js_content,
-          "html_renderer": html_renderer_callable,
-          #"html_renderer": _default_html_renderer_js_content,
           "agents": agents,
       }
       successfully_loaded_games.append(short_name)
 
-    except Exception as e:  # pylint: disable=broad-exception-caught
     except Exception as e:  # pylint: disable=broad-exception-caught
       skipped_games.append(short_name)
       if "connect_four" in short_name:
