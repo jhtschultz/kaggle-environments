@@ -4,11 +4,11 @@ function renderer(options) {
     // --- Constants ---
     const DEFAULT_NUM_ROWS = 3;
     const DEFAULT_NUM_COLS = 3;
-    const PLAYER_SYMBOLS = ['O', 'X']; // O: Visual for game player 'o', X: Visual for game player 'x'
+    const PLAYER_SYMBOLS = ['O', 'X'];
     const PLAYER_COLORS = ['#000000', '#000000'];
     const BOARD_BACKGROUND_COLOR = '#f0f0f0';
     const GRID_LINE_COLOR = '#cccccc';
-    const MARK_COLOR = '#000000'; // This should be a valid string like '#000000'
+    const MARK_COLOR = '#000000';
 
     const SVG_NS = "http://www.w3.org/2000/svg";
     const CELL_UNIT_SIZE = 100;
@@ -146,10 +146,16 @@ function renderer(options) {
         statusContainer.appendChild(currentWinnerTextElement);
         
         currentObservingPlayerTextElement = document.createElement('p');
-        currentObservingPlayerTextElement.style.fontSize = '0.9rem';
-        currentObservingPlayerTextElement.style.fontStyle = 'italic';
-        currentObservingPlayerTextElement.style.color = '#6b7280';
+        // --- DIAGNOSTIC STYLES AND CONTENT ---
+        currentObservingPlayerTextElement.textContent = "DEBUG: PERSPECTIVE TEXT SLOT"; // Initial debug text
+        currentObservingPlayerTextElement.style.fontSize = '1rem';      // Make it clearly visible
+        currentObservingPlayerTextElement.style.color = 'red';        // Bright color
+        currentObservingPlayerTextElement.style.backgroundColor = 'yellow'; // Contrasting background
         currentObservingPlayerTextElement.style.marginTop = '8px';
+        currentObservingPlayerTextElement.style.padding = '2px';
+        // --- END DIAGNOSTIC --- (Original styles were fine but this helps confirm visibility)
+        // currentObservingPlayerTextElement.style.fontStyle = 'italic';
+        // currentObservingPlayerTextElement.style.color = '#6b7280'; 
         statusContainer.appendChild(currentObservingPlayerTextElement);
 
         parentElementToClear.appendChild(currentRendererContainer);
@@ -163,17 +169,48 @@ function renderer(options) {
 
     function _renderBoardDisplay_svg(gameStateToDisplay, displayRows, displayCols) {
         if (!currentBoardSvgElement || !currentStatusTextElement || !currentWinnerTextElement || !currentObservingPlayerTextElement) {
-            console.error("SVG or text elements not ready for rendering.");
+            console.error("Rendering elements not ready. This should not happen if _ensureRendererElements succeeded.");
+            // Attempt to set default perspective text even if other elements are missing, for debugging.
+            if(currentObservingPlayerTextElement) currentObservingPlayerTextElement.textContent = "Perspective: (Elements missing)"; else console.error("currentObservingPlayerTextElement is also missing!");
             return;
         }
 
         const existingMarks = currentBoardSvgElement.querySelectorAll(".game-mark");
         existingMarks.forEach(mark => mark.remove());
 
+        // This variable will be updated with the actual perspective text
+        let perspectiveText = "Perspective: Game Master (Default)"; // Default before logic
+        const numAgentsInCurrentStep = (environment && environment.steps && environment.steps[step]) ? environment.steps[step].length : 0;
+        const actualGameMasterIndex = numAgentsInCurrentStep > 0 ? numAgentsInCurrentStep - 1 : -1;
+
+        if (observingPlayerIndex === -1 || observingPlayerIndex === actualGameMasterIndex) {
+            perspectiveText = "Perspective: Game Master";
+        } else if (observingPlayerIndex === 0) {
+            perspectiveText = "Perspective: Player X (Agent 0)";
+        } else if (observingPlayerIndex === 1) {
+            perspectiveText = "Perspective: Player O (Agent 1)";
+        } else if (observingPlayerIndex >= 0 && numAgentsInCurrentStep > 0 && observingPlayerIndex < actualGameMasterIndex) {
+            perspectiveText = `Perspective: Agent ${observingPlayerIndex}`;
+        } else {
+            // This is the fallback, already covered by the default initialization of perspectiveText
+            // but we add more detail if observingPlayerIndex was explicitly invalid.
+            if (observingPlayerIndex !== -1 && observingPlayerIndex !== actualGameMasterIndex) { 
+                 perspectiveText += ` [P${observingPlayerIndex} invalid]`;
+            }
+        }
+        // Restore original styles if the diagnostic ones were temporary
+        currentObservingPlayerTextElement.style.fontSize = '0.9rem';
+        currentObservingPlayerTextElement.style.fontStyle = 'italic';
+        currentObservingPlayerTextElement.style.color = '#6b7280';
+        currentObservingPlayerTextElement.style.backgroundColor = 'transparent'; // Remove diagnostic background
+        currentObservingPlayerTextElement.style.padding = '0'; // Remove diagnostic padding
+        currentObservingPlayerTextElement.textContent = perspectiveText;
+
+
         if (!gameStateToDisplay || typeof gameStateToDisplay.board !== 'object' || !Array.isArray(gameStateToDisplay.board) || gameStateToDisplay.board.length !== (displayRows * displayCols)) {
             currentStatusTextElement.textContent = "Waiting for player...";
             currentWinnerTextElement.textContent = "";
-            currentObservingPlayerTextElement.textContent = "Perspective: Game Master (Default)";
+            // Perspective text is already set above based on observingPlayerIndex
             return;
         }
 
@@ -184,7 +221,6 @@ function renderer(options) {
             if (cellValue === null || cellValue === undefined || String(cellValue).trim() === '') {
                 continue;
             }
-
             const row = Math.floor(i / displayCols);
             const col = i % displayCols;
             const cx = col * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
@@ -226,8 +262,6 @@ function renderer(options) {
 
         currentStatusTextElement.innerHTML = '';
         currentWinnerTextElement.innerHTML = '';
-        
-        // Define the common style string
         const spanStyle = 'font-weight: bold; color: ' + MARK_COLOR + ';';
 
         if (is_terminal) {
@@ -237,11 +271,8 @@ function renderer(options) {
                     currentWinnerTextElement.textContent = "It's a Draw!";
                 } else {
                     let winnerSymbolDisplay;
-                    if (String(winner).toLowerCase() === "o") {
-                        winnerSymbolDisplay = PLAYER_SYMBOLS[0]; // 'O'
-                    } else if (String(winner).toLowerCase() === "x") {
-                        winnerSymbolDisplay = PLAYER_SYMBOLS[1]; // 'X'
-                    }
+                    if (String(winner).toLowerCase() === "o") { winnerSymbolDisplay = PLAYER_SYMBOLS[0]; }
+                    else if (String(winner).toLowerCase() === "x") { winnerSymbolDisplay = PLAYER_SYMBOLS[1]; }
                     if (winnerSymbolDisplay) {
                         currentWinnerTextElement.innerHTML = 'Player <span style="' + spanStyle + '">' + winnerSymbolDisplay + '</span> Wins!';
                     } else {
@@ -251,38 +282,15 @@ function renderer(options) {
             } else { currentWinnerTextElement.textContent = "Game ended."; }
         } else {
             let playerSymbolToDisplay;
-            if (String(current_player).toLowerCase() === "o") {
-                playerSymbolToDisplay = PLAYER_SYMBOLS[0]; // 'O'
-            } else if (String(current_player).toLowerCase() === "x") {
-                playerSymbolToDisplay = PLAYER_SYMBOLS[1]; // 'X'
-            }
-
+            if (String(current_player).toLowerCase() === "o") { playerSymbolToDisplay = PLAYER_SYMBOLS[0]; }
+            else if (String(current_player).toLowerCase() === "x") { playerSymbolToDisplay = PLAYER_SYMBOLS[1]; }
             if (playerSymbolToDisplay) {
                 currentStatusTextElement.innerHTML = 'Current Player: <span style="' + spanStyle + '">' + playerSymbolToDisplay + '</span>';
             } else {
                 currentStatusTextElement.textContent = "Waiting for player...";
             }
         }
-
-        let perspectiveText;
-        const numAgentsInCurrentStep = (environment && environment.steps && environment.steps[step]) ? environment.steps[step].length : 0;
-        const actualGameMasterIndex = numAgentsInCurrentStep > 0 ? numAgentsInCurrentStep - 1 : -1;
-
-        if (observingPlayerIndex === -1 || observingPlayerIndex === actualGameMasterIndex) {
-            perspectiveText = "Perspective: Game Master";
-        } else if (observingPlayerIndex === 0) {
-            perspectiveText = "Perspective: Player X (Agent 0)";
-        } else if (observingPlayerIndex === 1) {
-            perspectiveText = "Perspective: Player O (Agent 1)";
-        } else if (observingPlayerIndex >= 0 && numAgentsInCurrentStep > 0 && observingPlayerIndex < actualGameMasterIndex) {
-            perspectiveText = `Perspective: Agent ${observingPlayerIndex}`;
-        } else {
-            perspectiveText = "Perspective: Game Master (Default)";
-            if (observingPlayerIndex !== -1) {
-                 perspectiveText += ` [P${observingPlayerIndex} invalid]`;
-            }
-        }
-        currentObservingPlayerTextElement.textContent = perspectiveText;
+        // Perspective text is already set at the beginning of this function now.
     }
 
     if (!_ensureRendererElements(parent, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS)) {
@@ -340,11 +348,8 @@ function renderer(options) {
         }
 
         let currentPlayerForState = null;
-        if (observationForBoardState.current_player === 0) {
-            currentPlayerForState = 'x';
-        } else if (observationForBoardState.current_player === 1) {
-            currentPlayerForState = 'o';
-        }
+        if (observationForBoardState.current_player === 0) { currentPlayerForState = 'x'; }
+        else if (observationForBoardState.current_player === 1) { currentPlayerForState = 'o'; }
 
         const isTerminal = !!observationForBoardState.is_terminal;
         let winnerForState = null;

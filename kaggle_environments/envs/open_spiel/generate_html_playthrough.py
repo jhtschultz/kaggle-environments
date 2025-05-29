@@ -2,7 +2,6 @@ import os
 import random
 from kaggle_environments import make
 import pyspiel
-from .games.connect_four import connect_four_proxy
 
 def random_agent(observation):
   """A built-in random agent specifically for OpenSpiel environments. """
@@ -15,9 +14,11 @@ def random_agent(observation):
 agents = [random_agent] * 3
 
 # --- Configuration ---
-open_spiel_game_name = "chess"
+#open_spiel_game_name = "universal_poker_proxy"
+open_spiel_game_name = "universal_poker_proxy(betting=nolimit,numPlayers=2,stack=20000 20000,numRounds=4,blind=50 100,firstPlayer=2 1 1 1,numSuits=4,numRanks=13,numHoleCards=2,numBoardCards=0 3 1 1,bettingAbstraction=fullgame)"
 game = pyspiel.load_game(open_spiel_game_name)
-environment_name = f"open_spiel_{open_spiel_game_name}"
+game_type = game.get_type()
+environment_name = f"open_spiel_{game_type.short_name}"
 agents_to_run = ["random"] * game.num_players() + ["game_master"]
 output_html_file = f"kaggle_environments/envs/open_spiel/{environment_name}_game_replay.html"
 replay_width = 500

@@ -74,7 +74,7 @@ class ConnectFourGame(proxy.Game):
     super().__init__(
         wrapped,
         short_name='connect_four_proxy',
-        long_name='Connect Four (proxy)',
+        long_name='Connect Four (Proxy)',
     )
 
   def new_initial_state(self, *args) -> ConnectFourState:

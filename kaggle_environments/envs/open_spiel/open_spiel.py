@@ -11,10 +11,14 @@ from kaggle_environments import utils
 import numpy as np
 import pyspiel
 from .games.connect_four import connect_four_proxy
+from .games.tic_tac_toe import tic_tac_toe_proxy
+from .games.universal_poker import universal_poker_proxy
 
 DEFAULT_ACT_TIMEOUT = 5
 DEFAULT_RUN_TIMEOUT = 1200
 DEFAULT_EPISODE_STEP_BUFFER = 100  # To account for timeouts, retrys, etc...
+#ACPC_HU_NLHE_GAME_STR = 'universal_poker_proxy(betting=nolimit,numPlayers=2,stack=20000 20000,numRounds=4,blind=50 100,firstPlayer=2 1 1 1,numSuits=4,numRanks=13,numHoleCards=2,numBoardCards=0 3 1 1,bettingAbstraction=fullgame)'
+ACPC_HU_NLHE_GAME_STR = 'universal_poker_proxy(betting=nolimit,numPlayers=2,stack=20 20,numRounds=4,blind=1 2,firstPlayer=2 1 1 1,numSuits=4,numRanks=13,numHoleCards=2,numBoardCards=0 3 1 1,bettingAbstraction=fullgame)'
 
 BASE_SPEC_TEMPLATE = {
     "name": "PLACEHOLDER_NAME",
@@ -263,10 +267,12 @@ def interpreter(
         legal_actions, chance_outcome_probs = zip(*outcomes)
     else:
       game_type = _OS_GLOBAL_GAME.get_type()
-      if game_type.provides_information_state_string:
-        obs_str = _OS_GLOBAL_STATE.information_state_string(i)
-      elif game_type.provides_observation_string:
+      #if game_type.provides_information_state_string:
+      #  obs_str = _OS_GLOBAL_STATE.information_state_string(i)
+      if game_type.provides_observation_string:
         obs_str = _OS_GLOBAL_STATE.observation_string(i)
+      elif game_type.provides_information_state_string:
+        obs_str = _OS_GLOBAL_STATE.information_state_string(i)
       else:
         raise ValueError(
           "Must provide either information state or observation string"
@@ -472,6 +478,7 @@ def _register_open_spiel_envs(
     try:
       game = pyspiel.load_game(short_name)
       game_type = game.get_type()
+      short_name = game_type.short_name
       if not any([
         game_type.provides_information_state_string,
         game_type.provides_observation_string,
@@ -491,10 +498,13 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
       game_spec["configuration"]["episodeSteps"] = (
           game.max_history_length() + DEFAULT_EPISODE_STEP_BUFFER
       )
-      game_spec["configuration"]["openSpielGameString"]["default"] = str(game)
+      game_str = str(game)
+      if game_str.startswith("universal_poker_proxy"):
+        game_str = ACPC_HU_NLHE_GAME_STR
+      game_spec["configuration"]["openSpielGameString"]["default"] = game_str
       game_spec["configuration"]["openSpielGameName"]["default"] = short_name
       game_spec["observation"]["properties"]["openSpielGameString"][
-          "default"] = str(game)
+          "default"] = game_str
       game_spec["observation"]["properties"]["openSpielGameName"][
           "default"] = short_name
 
@@ -514,8 +524,8 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
           "specification": game_spec,
           "interpreter": interpreter,
           "renderer": renderer,
-          "html_renderer": html_renderer_callable,
-          #"html_renderer": _default_html_renderer_js_content,
+          #"html_renderer": html_renderer_callable,
+          "html_renderer": _default_html_renderer_js_content,
           "agents": agents,
       }
       successfully_loaded_games.append(short_name)
@@ -527,11 +537,10 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
         print(short_name)
         print(e)
         print("="*20)
-      if "connect_four" in short_name:
-        print("="*20)
-        print(short_name)
-        print(e)
-        print("="*20)
+      print("="*20)
+      print(short_name)
+      print(e)
+      print("="*20)
       continue
 
   print(f"""
@@ -542,4 +551,10 @@ OpenSpiel games skipped: {len(skipped_games)}.
   return registered_envs
 
 
-registered_open_spiel_envs = _register_open_spiel_envs(['chess'])
+registered_open_spiel_envs = _register_open_spiel_envs([
+  'chess',
+  'connect_four_proxy',
+  'tic_tac_toe_proxy',
+  #'universal_poker_proxy',
+  ACPC_HU_NLHE_GAME_STR,
+])

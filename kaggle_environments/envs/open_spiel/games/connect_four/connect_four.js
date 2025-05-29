@@ -24,7 +24,6 @@ function renderer(options) {
     let currentTitleElement = null;
 
     function _showMessage(message, type = 'info', duration = 3000) {
-        // ... (showMessage function remains the same)
         if (typeof document === 'undefined' || !document.body) return;
         if (!currentMessageBoxElement) {
             currentMessageBoxElement = document.createElement('div');
@@ -101,7 +100,7 @@ function renderer(options) {
                 const circle = document.createElementNS(SVG_NS, "circle");
                 const cx = c_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
                 const cy = r_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
-                circle.setAttribute("id", `cell-${r_visual}-${c_visual}`); // ID based on visual row/col
+                circle.setAttribute("id", `cell-${r_visual}-${c_visual}`);
                 circle.setAttribute("cx", cx.toString());
                 circle.setAttribute("cy", cy.toString());
                 circle.setAttribute("r", CIRCLE_RADIUS.toString());
@@ -112,7 +111,6 @@ function renderer(options) {
         currentRendererContainer.appendChild(currentBoardSvgElement);
 
         const statusContainer = document.createElement('div');
-        // ... (statusContainer setup)
         statusContainer.style.padding = '10px 15px';
         statusContainer.style.backgroundColor = 'white';
         statusContainer.style.borderRadius = '8px';
@@ -124,14 +122,12 @@ function renderer(options) {
         currentRendererContainer.appendChild(statusContainer);
 
         currentStatusTextElement = document.createElement('p');
-        // ... (currentStatusTextElement setup)
         currentStatusTextElement.style.fontSize = '1.1rem';
         currentStatusTextElement.style.fontWeight = '600';
         currentStatusTextElement.style.margin = '0 0 5px 0';
         statusContainer.appendChild(currentStatusTextElement);
         
         currentWinnerTextElement = document.createElement('p');
-        // ... (currentWinnerTextElement setup)
         currentWinnerTextElement.style.fontSize = '1.25rem';
         currentWinnerTextElement.style.fontWeight = '700';
         currentWinnerTextElement.style.margin = '5px 0 0 0';
@@ -165,20 +161,7 @@ function renderer(options) {
 
         const { board, current_player, is_terminal, winner } = gameStateToDisplay;
 
-        // Iterate through the board data (board[r_data][c_data])
-        // board[0] is the first row in the JSON, conventionally the TOP row of data.
-        // For Connect Four, pieces stack from the bottom.
-        // So, board[0] (top data row) should be displayed at the visual BOTTOM if pieces fall.
-        // OR, if board[0] data actually IS the visual top row (where pieces are if column is full),
-        // and "upside down" means pieces are hanging at the top instead of stacking at the bottom,
-        // we need to map board[r_data] (data row) to the correct visual SVG row.
-        
-        // If board data `board[r_data]` corresponds to visual row `r_data` (0=top),
-        // and pieces are stacking from the "top" of the data array downwards,
-        // then to display correctly (pieces at bottom), data row `r_data`
-        // must be mapped to visual SVG row `(displayRows - 1) - r_data`.
-
-        for (let r_data = 0; r_data < displayRows; r_data++) { // r_data iterates through rows of `board`
+        for (let r_data = 0; r_data < displayRows; r_data++) {
             const dataRow = board[r_data]; 
             if (!dataRow || !Array.isArray(dataRow) || dataRow.length !== displayCols) {
                 // Error handling for malformed row
@@ -192,14 +175,9 @@ function renderer(options) {
                 continue;
             }
 
-            // This is the crucial change for "upside down" board:
-            // Map the data row index (r_data) to the visual SVG row index.
-            // If board[0] (from JSON) should be at the bottom of the visual display:
             const visual_svg_row_index = (displayRows - 1) - r_data;
-            // If board[0] (from JSON) IS the top of the visual display (current state):
-            // const visual_svg_row_index = r_data; // Keep this if the previous state was correct data-wise
 
-            for (let c_data = 0; c_data < displayCols; c_data++) { // c_data iterates through columns of `board[r_data]`
+            for (let c_data = 0; c_data < displayCols; c_data++) {
                 const originalCellValue = dataRow[c_data];
                 const cellValueForComparison = String(originalCellValue).trim().toLowerCase();
                 
@@ -211,18 +189,17 @@ function renderer(options) {
                 
                 let fillColor = EMPTY_CELL_COLOR;
                 if (cellValueForComparison === "o") { 
-                    fillColor = PLAYER_COLORS[0]; // Yellow
+                    fillColor = PLAYER_COLORS[0];  // Yellow
                 } else if (cellValueForComparison === "x") { 
-                    fillColor = PLAYER_COLORS[1]; // Red
+                    fillColor = PLAYER_COLORS[1];  // Red
                 }
                 circleElement.setAttribute("fill", fillColor);
             }
         }
 
         // Status and Winner display (remains the same)
-        currentStatusTextElement.innerHTML = ''; /* ... */
-        currentWinnerTextElement.innerHTML = ''; /* ... */
-        // (The status display logic from before is fine, keeping it concise here)
+        currentStatusTextElement.innerHTML = '';
+        currentWinnerTextElement.innerHTML = '';
         if (is_terminal) {
             currentStatusTextElement.textContent = "Game Over!";
             if (winner !== null && winner !== undefined) {
@@ -262,7 +239,6 @@ function renderer(options) {
     }
 
     // --- Main execution logic ---
-    // ... (Main logic remains the same, calling _renderBoardDisplay_svg)
     if (!_ensureRendererElements(parent, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS)) {
         if (parent && typeof parent.innerHTML !== 'undefined') {
             parent.innerHTML = "<p style='color:red; font-family: sans-serif;'>Critical Error: Renderer element setup failed.</p>";
