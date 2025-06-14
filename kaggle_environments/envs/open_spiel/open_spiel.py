@@ -10,7 +10,11 @@ from kaggle_environments import core
 from kaggle_environments import utils
 import numpy as np
 import pyspiel
+# TODO(jhtschultz): import all proxies together
 from .games.connect_four import connect_four_proxy
+from .games.go import go_proxy
+from .games.tic_tac_toe import tic_tac_toe_proxy
+from .games.universal_poker import universal_poker_proxy
 
 DEFAULT_ACT_TIMEOUT = 5
 DEFAULT_RUN_TIMEOUT = 1200
@@ -36,6 +40,11 @@ BASE_SPEC_TEMPLATE = {
             "description": "The short_name of the OpenSpiel game to load.",
             "type": "string",
             "default": "PLACEHOLDER_GAME_SHORT_NAME"
+        },
+        "openSpielGameParameters": {
+            "description": "Game parameters for Open Spiel game.",
+            "type": "object",
+            "default": {}
         },
     },
     "observation": {
@@ -100,15 +109,21 @@ _OS_GLOBAL_GAME = None
 _OS_GLOBAL_STATE = None
 
 
-def _get_open_spiel_game(env_config: utils.Struct) -> pyspiel.Game:
+#def _get_open_spiel_game(env_config: utils.Struct) -> pyspiel.Game:
+def _get_open_spiel_game(env) -> pyspiel.Game:
   global _OS_GLOBAL_GAME
+  env_config = env.configuration
   game_string = env_config.get("openSpielGameString")
+  game_name = env_config.get("openSpielGameName")
+  game_params = env_config.get("openSpielGameParameters")
   if game_string == str(_OS_GLOBAL_GAME):
     return _OS_GLOBAL_GAME
   if _OS_GLOBAL_GAME is not None:
-    print(
-      f"WARNING: Overwriting game. Old: {_OS_GLOBAL_GAME}. New {game_string}"
-    )
+    return _OS_GLOBAL_GAME
+    #print(
+    #  f"WARNING: Overwriting game. Old: {_OS_GLOBAL_GAME}. New {game_string}"
+    #)
+  #_OS_GLOBAL_GAME = pyspiel.load_game(game_name, game_params)
   _OS_GLOBAL_GAME = pyspiel.load_game(game_string)
   return _OS_GLOBAL_GAME
 
@@ -126,7 +141,7 @@ def interpreter(
     return kaggle_state
 
   # --- Get Game Info ---
-  game = _get_open_spiel_game(env.configuration)
+  game = _get_open_spiel_game(env)
   num_players = game.num_players()
   statuses = [
       kaggle_state[os_current_player].status
@@ -204,7 +219,7 @@ def interpreter(
       info_dict["action_applied"] = action_applied
 
     game_type = _OS_GLOBAL_GAME.get_type()
-    obs_str = str(_OS_GLOBAL_STATE)
+    obs_str = _OS_GLOBAL_STATE.observation_string(i)
     legal_actions = _OS_GLOBAL_STATE.legal_actions(i)
 
     if status == "ACTIVE" and not legal_actions:
@@ -297,8 +312,6 @@ def _get_html_renderer_content(
   Tries to load a custom JS renderer for the game.
   Falls back to the default renderer if not found or on error.
   """
-  if "proxy" not in open_spiel_short_name:
-    return default_renderer_func()
   sanitized_game_name = open_spiel_short_name.replace('-', '_').replace('.', '_')
   sanitized_game_name = sanitized_game_name.removesuffix("_proxy")
   custom_renderer_js_path = (
@@ -336,19 +349,29 @@ agents = {
 }
 
 
+# TODOs
+# This should be split into a build env config per game function, Then loop over that
+# If proxy exists, completely overwrite
 def _register_open_spiel_envs(
-  games_list: list[str] | None = None,
+  games_list: list[str],
 ) -> dict[str, Any]:
   successfully_loaded_games = []
   skipped_games = []
   registered_envs = {}
   current_file_dir = pathlib.Path(__file__).parent.resolve()
   custom_renderers_base = current_file_dir / "games"
-  if games_list is None:
-    games_list = pyspiel.registered_names()
-  for short_name in games_list:
+  for game_string in games_list:
     try:
-      game = pyspiel.load_game(short_name)
+      game = pyspiel.load_game(game_string)
+      short_name = game.get_type().short_name
+      proxy_path = (
+          custom_renderers_base /
+          short_name /
+          f"{short_name}_proxy.py"
+      )
+      if proxy_path.is_file():
+        game = pyspiel.load_game(short_name + "_proxy", game.get_parameters())
+
       game_type = game.get_type()
       if not any([
         game_type.provides_information_state_string,
@@ -402,6 +425,7 @@ https://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games
       successfully_loaded_games.append(short_name)
 
     except Exception as e:  # pylint: disable=broad-exception-caught
+      raise e
       skipped_games.append(short_name)
       continue
 
@@ -413,4 +437,14 @@ OpenSpiel games skipped: {len(skipped_games)}.
   return registered_envs
 
 
-registered_open_spiel_envs = _register_open_spiel_envs()
+# TODO: can only register one config per game
+GAMES_LIST = [
+    "chess",
+    "connect_four",
+    "go",
+    "tic_tac_toe",
+    #"universal_poker",
+    "universal_poker(betting=nolimit,bettingAbstraction=fullgame,blind=1 2,firstPlayer=2 1 1 1,numBoardCards=0 3 1 1,numHoleCards=2,numPlayers=2,numRanks=13,numRounds=4,numSuits=4,stack=20 20)",
+]
+
+registered_open_spiel_envs = _register_open_spiel_envs(GAMES_LIST)

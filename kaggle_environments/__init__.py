@@ -40,14 +40,14 @@ for name in listdir(utils.envs_path):
                     "renderer": env_dict.get("renderer"),
                     "specification": env_dict.get("specification"),
                 })
-        else:
-          register(name, {
-              "agents": getattr(env, "agents", []),
-              "html_renderer": getattr(env, "html_renderer", None),
-              "interpreter": getattr(env, "interpreter"),
-              "renderer": getattr(env, "renderer"),
-              "specification": getattr(env, "specification"),
-          })
+        #else:
+        #  register(name, {
+        #      "agents": getattr(env, "agents", []),
+        #      "html_renderer": getattr(env, "html_renderer", None),
+        #      "interpreter": getattr(env, "interpreter"),
+        #      "renderer": getattr(env, "renderer"),
+        #      "specification": getattr(env, "specification"),
+        #  })
     except Exception as e:
         if "football" not in name:
             print("Loading environment %s failed: %s" % (name, e))

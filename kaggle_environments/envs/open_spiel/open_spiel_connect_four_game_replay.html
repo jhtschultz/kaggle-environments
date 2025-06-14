@@ -1,0 +1,2131 @@
+<!--
+  Copyright 2020 Kaggle Inc
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Kaggle Simulation Player</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.css"
+      crossorigin="anonymous"
+    />
+    <style type="text/css">
+      html,
+      body {
+        height: 100%;
+        font-family: sans-serif;
+        margin: 0px;
+      }
+      canvas {
+        /* image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges; */
+      }
+    </style>
+    <script src="https://unpkg.com/preact@10.0.1/dist/preact.umd.js"></script>
+    <script src="https://unpkg.com/preact@10.0.1/hooks/dist/hooks.umd.js"></script>
+    <script src="https://unpkg.com/htm@2.2.1/dist/htm.umd.js"></script>
+    <script src="https://unpkg.com/chess.js@0.12.0/chess.js"></script>
+    <script>
+      // Polyfill for Styled Components
+      window.React = {
+        ...preact,
+        createElement: preact.h,
+        PropTypes: { func: {} },
+      };
+    </script>
+    <script src="https://unpkg.com/styled-components@3.5.0-0/dist/styled-components.min.js"></script>
+  </head>
+  <body>
+    <script>
+      
+window.kaggle = {
+  "debug": true,
+  "playing": true,
+  "step": 0,
+  "controls": true,
+  "environment": {
+    "id": "f5046fde-4959-11f0-82b7-ea921b189151",
+    "name": "open_spiel_connect_four",
+    "title": "Open Spiel: connect_four",
+    "description": "Kaggle environment wrapper for OpenSpiel games.\nFor game implementation details see:\nhttps://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games",
+    "version": "0.1.0",
+    "configuration": {
+      "openSpielGameParameters": {},
+      "episodeSteps": 142,
+      "actTimeout": 5,
+      "runTimeout": 1200,
+      "openSpielGameString": "connect_four_proxy()",
+      "openSpielGameName": "connect_four"
+    },
+    "specification": {
+      "action": {
+        "type": [
+          "integer"
+        ],
+        "minimum": -1,
+        "default": -1
+      },
+      "agents": [
+        2
+      ],
+      "configuration": {
+        "episodeSteps": {
+          "description": "Maximum number of steps in the episode.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 142
+        },
+        "actTimeout": {
+          "description": "Maximum runtime (seconds) to obtain an action from an agent.",
+          "type": "number",
+          "minimum": 0,
+          "default": 5
+        },
+        "runTimeout": {
+          "description": "Maximum runtime (seconds) of an episode (not necessarily DONE).",
+          "type": "number",
+          "minimum": 0,
+          "default": 1200
+        },
+        "openSpielGameString": {
+          "description": "The full game string including parameters.",
+          "type": "string",
+          "default": "connect_four_proxy()"
+        },
+        "openSpielGameName": {
+          "description": "The short_name of the OpenSpiel game to load.",
+          "type": "string",
+          "default": "connect_four"
+        },
+        "openSpielGameParameters": {
+          "description": "Game parameters for Open Spiel game.",
+          "type": "object",
+          "default": {},
+          "properties": {}
+        }
+      },
+      "info": {},
+      "observation": {
+        "remainingOverageTime": {
+          "description": "Total remaining banked time (seconds) that can be used in excess of per-step actTimeouts -- agent is disqualified with TIMEOUT status when this drops below 0.",
+          "shared": false,
+          "type": "number",
+          "minimum": 0,
+          "default": 12
+        },
+        "step": {
+          "description": "Current step within the episode.",
+          "type": "integer",
+          "shared": true,
+          "minimum": 0,
+          "default": 0
+        },
+        "properties": {
+          "openSpielGameString": {
+            "description": "Full game string including parameters.",
+            "type": "string",
+            "default": "connect_four_proxy()"
+          },
+          "openSpielGameName": {
+            "description": "Short name of the OpenSpiel game.",
+            "type": "string",
+            "default": "connect_four"
+          },
+          "observation_string": {
+            "description": "String representation of state.",
+            "type": "string"
+          },
+          "legal_actions": {
+            "description": "List of OpenSpiel legal actions.",
+            "type": "array"
+          },
+          "chance_outcome_probs": {
+            "description": "List of probabilities for chance outcomes.",
+            "type": "array"
+          },
+          "current_player": {
+            "description": "ID of player whose turn it is.",
+            "type": "integer"
+          },
+          "is_terminal": {
+            "description": "Boolean indicating game end.",
+            "type": "boolean"
+          },
+          "player_id": {
+            "description": "ID of the agent receiving this observation.",
+            "type": "integer"
+          },
+          "remainingOverageTime": 60,
+          "step": 0
+        },
+        "default": {}
+      },
+      "reward": {
+        "type": [
+          "number",
+          "null"
+        ],
+        "default": 0.0
+      }
+    },
+    "steps": [
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 1,
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 2,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 2
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 2,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 3,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 4,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 4
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 3,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 4,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 5,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 5,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 5
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 0,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 0
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 6,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 7,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 5,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 5
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 0,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 0
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 8,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 9,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 6,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 6
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 4,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 4
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 10,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 11,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 1,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 1
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 3,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 13,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 6,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 6
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 1,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 1
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 14,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 15,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 2,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 2
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 0,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 0
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 16,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 17,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 3,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 5,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 5
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 18,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": 0.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 19,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 2,
+          "reward": 0.0,
+          "info": {
+            "action_applied": 2
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 0,
+          "reward": 1.0,
+          "info": {
+            "action_applied": 0
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 20,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
+            "legal_actions": [],
+            "current_player": -4,
+            "is_terminal": true,
+            "player_id": 0
+          },
+          "status": "DONE"
+        },
+        {
+          "action": -1,
+          "reward": -1.0,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
+            "legal_actions": [],
+            "current_player": -4,
+            "is_terminal": true,
+            "player_id": 1
+          },
+          "status": "DONE"
+        }
+      ]
+    ],
+    "rewards": [
+      1.0,
+      -1.0
+    ],
+    "statuses": [
+      "DONE",
+      "DONE"
+    ],
+    "schema_version": 1,
+    "info": {}
+  },
+  "logs": [
+    [],
+    [],
+    [
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "duration": 3e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 2.8e-05,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 9e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 8e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 9e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 5e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 5e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 5e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 6e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ]
+  ],
+  "mode": "html",
+  "width": 500,
+  "height": 450
+};
+
+
+window.kaggle.renderer = function renderer(options) {
+    const { environment, step, parent, interactive, isInteractive } = options;
+
+    const DEFAULT_NUM_ROWS = 6;
+    const DEFAULT_NUM_COLS = 7;
+    const PLAYER_SYMBOLS = ['O', 'X']; // O: Player 0 (Yellow), X: Player 1 (Red)
+    const PLAYER_COLORS = ['#facc15', '#ef4444']; // Yellow for 'O', Red for 'X'
+    const EMPTY_CELL_COLOR = '#e5e7eb'; 
+    const BOARD_COLOR = '#3b82f6';      
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const CELL_UNIT_SIZE = 100; 
+    const CIRCLE_RADIUS = CELL_UNIT_SIZE * 0.42; 
+    const SVG_VIEWBOX_WIDTH = DEFAULT_NUM_COLS * CELL_UNIT_SIZE;
+    const SVG_VIEWBOX_HEIGHT = DEFAULT_NUM_ROWS * CELL_UNIT_SIZE;
+
+    let currentBoardSvgElement = null; 
+    let currentStatusTextElement = null;
+    let currentWinnerTextElement = null;
+    let currentMessageBoxElement = typeof document !== 'undefined' ? document.getElementById('messageBox') : null;
+    let currentRendererContainer = null;
+    let currentTitleElement = null;
+
+    function _showMessage(message, type = 'info', duration = 3000) {
+        if (typeof document === 'undefined' || !document.body) return;
+        if (!currentMessageBoxElement) {
+            currentMessageBoxElement = document.createElement('div');
+            currentMessageBoxElement.id = 'messageBox';
+            currentMessageBoxElement.style.position = 'fixed';
+            currentMessageBoxElement.style.top = '10px';
+            currentMessageBoxElement.style.left = '50%';
+            currentMessageBoxElement.style.transform = 'translateX(-50%)';
+            currentMessageBoxElement.style.padding = '0.75rem 1rem';
+            currentMessageBoxElement.style.borderRadius = '0.375rem';
+            currentMessageBoxElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            currentMessageBoxElement.style.zIndex = '1000';
+            currentMessageBoxElement.style.opacity = '0';
+            currentMessageBoxElement.style.transition = 'opacity 0.3s ease-in-out, background-color 0.3s';
+            currentMessageBoxElement.style.fontSize = '0.875rem';
+            currentMessageBoxElement.style.fontFamily = "'Inter', sans-serif";
+            document.body.appendChild(currentMessageBoxElement);
+        }
+        currentMessageBoxElement.textContent = message;
+        currentMessageBoxElement.style.backgroundColor = type === 'error' ? '#ef4444' : '#10b981';
+        currentMessageBoxElement.style.color = 'white';
+        currentMessageBoxElement.style.opacity = '1';
+        setTimeout(() => { if (currentMessageBoxElement) currentMessageBoxElement.style.opacity = '0'; }, duration);
+    }
+
+    function _ensureRendererElements(parentElementToClear, rows, cols) {
+        if (!parentElementToClear) return false;
+        parentElementToClear.innerHTML = ''; 
+
+        currentRendererContainer = document.createElement('div');
+        currentRendererContainer.style.display = 'flex';
+        currentRendererContainer.style.flexDirection = 'column';
+        currentRendererContainer.style.alignItems = 'center';
+        currentRendererContainer.style.padding = '20px';
+        currentRendererContainer.style.boxSizing = 'border-box';
+        currentRendererContainer.style.width = '100%';
+        currentRendererContainer.style.height = '100%';
+        currentRendererContainer.style.fontFamily = "'Inter', sans-serif";
+
+        currentTitleElement = document.createElement('h1');
+        currentTitleElement.textContent = 'Connect Four';
+        currentTitleElement.style.fontSize = '1.875rem';
+        currentTitleElement.style.fontWeight = 'bold';
+        currentTitleElement.style.marginBottom = '1rem';
+        currentTitleElement.style.textAlign = 'center';
+        currentTitleElement.style.color = '#2563eb';
+        currentRendererContainer.appendChild(currentTitleElement);
+
+        currentBoardSvgElement = document.createElementNS(SVG_NS, "svg");
+        currentBoardSvgElement.setAttribute("viewBox", `0 0 ${SVG_VIEWBOX_WIDTH} ${SVG_VIEWBOX_HEIGHT}`);
+        currentBoardSvgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        currentBoardSvgElement.style.width = "auto"; 
+        currentBoardSvgElement.style.maxWidth = "500px"; 
+        currentBoardSvgElement.style.maxHeight = `calc(100vh - 200px)`; 
+        currentBoardSvgElement.style.aspectRatio = `${cols} / ${rows}`;
+        currentBoardSvgElement.style.display = "block"; 
+        currentBoardSvgElement.style.margin = "0 auto 20px auto"; 
+
+        const boardBgRect = document.createElementNS(SVG_NS, "rect");
+        boardBgRect.setAttribute("x", "0");
+        boardBgRect.setAttribute("y", "0");
+        boardBgRect.setAttribute("width", SVG_VIEWBOX_WIDTH.toString());
+        boardBgRect.setAttribute("height", SVG_VIEWBOX_HEIGHT.toString());
+        boardBgRect.setAttribute("fill", BOARD_COLOR);
+        boardBgRect.setAttribute("rx", (CELL_UNIT_SIZE * 0.1).toString()); 
+        currentBoardSvgElement.appendChild(boardBgRect);
+
+        // SVG Circles are created with (0,0) being top-left visual circle
+        for (let r_visual = 0; r_visual < rows; r_visual++) {
+            for (let c_visual = 0; c_visual < cols; c_visual++) {
+                const circle = document.createElementNS(SVG_NS, "circle");
+                const cx = c_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
+                const cy = r_visual * CELL_UNIT_SIZE + CELL_UNIT_SIZE / 2;
+                circle.setAttribute("id", `cell-${r_visual}-${c_visual}`);
+                circle.setAttribute("cx", cx.toString());
+                circle.setAttribute("cy", cy.toString());
+                circle.setAttribute("r", CIRCLE_RADIUS.toString());
+                circle.setAttribute("fill", EMPTY_CELL_COLOR);
+                currentBoardSvgElement.appendChild(circle);
+            }
+        }
+        currentRendererContainer.appendChild(currentBoardSvgElement);
+
+        const statusContainer = document.createElement('div');
+        statusContainer.style.padding = '10px 15px';
+        statusContainer.style.backgroundColor = 'white';
+        statusContainer.style.borderRadius = '8px';
+        statusContainer.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)';
+        statusContainer.style.textAlign = 'center';
+        statusContainer.style.width = 'auto';
+        statusContainer.style.minWidth = '200px'; 
+        statusContainer.style.maxWidth = '90vw';
+        currentRendererContainer.appendChild(statusContainer);
+
+        currentStatusTextElement = document.createElement('p');
+        currentStatusTextElement.style.fontSize = '1.1rem';
+        currentStatusTextElement.style.fontWeight = '600';
+        currentStatusTextElement.style.margin = '0 0 5px 0';
+        statusContainer.appendChild(currentStatusTextElement);
+        
+        currentWinnerTextElement = document.createElement('p');
+        currentWinnerTextElement.style.fontSize = '1.25rem';
+        currentWinnerTextElement.style.fontWeight = '700';
+        currentWinnerTextElement.style.margin = '5px 0 0 0';
+        statusContainer.appendChild(currentWinnerTextElement);
+        
+        parentElementToClear.appendChild(currentRendererContainer);
+        
+        if (typeof document !== 'undefined' && !document.body.hasAttribute('data-renderer-initialized')) {
+             document.body.setAttribute('data-renderer-initialized', 'true');
+        }
+        return true;
+    }
+
+    function _renderBoardDisplay_svg(gameStateToDisplay, displayRows, displayCols) {
+        if (!currentBoardSvgElement || !currentStatusTextElement || !currentWinnerTextElement) return;
+
+        if (!gameStateToDisplay || typeof gameStateToDisplay.board !== 'object' || !Array.isArray(gameStateToDisplay.board) || gameStateToDisplay.board.length === 0) {
+            currentStatusTextElement.textContent = "Waiting for game data...";
+            currentWinnerTextElement.textContent = "";
+            for (let r_visual = 0; r_visual < displayRows; r_visual++) {
+                for (let c_visual = 0; c_visual < displayCols; c_visual++) {
+                    const circleElement = currentBoardSvgElement.querySelector(`#cell-${r_visual}-${c_visual}`);
+                    if (circleElement) {
+                        circleElement.setAttribute("fill", EMPTY_CELL_COLOR);
+                    }
+                }
+            }
+            return;
+        }
+
+        const { board, current_player, is_terminal, winner } = gameStateToDisplay;
+
+        for (let r_data = 0; r_data < displayRows; r_data++) {
+            const dataRow = board[r_data]; 
+            if (!dataRow || !Array.isArray(dataRow) || dataRow.length !== displayCols) {
+                // Error handling for malformed row
+                for (let c_fill = 0; c_fill < displayCols; c_fill++) {
+                    // Determine visual row for error display. If r_data=0 is top data,
+                    // and we want to flip, then this error is for visual row (displayRows-1)-0.
+                    const visual_row_for_error = (displayRows - 1) - r_data;
+                    const circleElement = currentBoardSvgElement.querySelector(`#cell-${visual_row_for_error}-${c_fill}`);
+                    if (circleElement) circleElement.setAttribute("fill", '#FF00FF'); // Magenta for error
+                }
+                continue;
+            }
+
+            const visual_svg_row_index = (displayRows - 1) - r_data;
+
+            for (let c_data = 0; c_data < displayCols; c_data++) { // c_data iterates through columns of `board[r_data]`
+                const originalCellValue = dataRow[c_data];
+                const cellValueForComparison = String(originalCellValue).trim().toLowerCase();
+                
+                // The column index for SVG is the same as c_data
+                const visual_svg_col_index = c_data;
+                const circleElement = currentBoardSvgElement.querySelector(`#cell-${visual_svg_row_index}-${visual_svg_col_index}`);
+                
+                if (!circleElement) continue;
+                
+                let fillColor = EMPTY_CELL_COLOR;
+                if (cellValueForComparison === "o") { 
+                    fillColor = PLAYER_COLORS[0]; // Yellow
+                } else if (cellValueForComparison === "x") { 
+                    fillColor = PLAYER_COLORS[1]; // Red
+                }
+                circleElement.setAttribute("fill", fillColor);
+            }
+        }
+
+        currentStatusTextElement.innerHTML = '';
+        currentWinnerTextElement.innerHTML = '';
+        if (is_terminal) {
+            currentStatusTextElement.textContent = "Game Over!";
+            if (winner !== null && winner !== undefined) {
+                if (String(winner).toLowerCase() === 'draw') {
+                    currentWinnerTextElement.textContent = "It's a Draw!";
+                } else {
+                    let winnerSymbolDisplay, winnerColorDisplay;
+                    if (String(winner).toLowerCase() === "o") {
+                        winnerSymbolDisplay = PLAYER_SYMBOLS[0]; 
+                        winnerColorDisplay = PLAYER_COLORS[0];   
+                    } else if (String(winner).toLowerCase() === "x") {
+                        winnerSymbolDisplay = PLAYER_SYMBOLS[1]; 
+                        winnerColorDisplay = PLAYER_COLORS[1];   
+                    }
+                    if (winnerSymbolDisplay) {
+                         currentWinnerTextElement.innerHTML = `Player <span style="color: ${winnerColorDisplay}; font-weight: bold;">${winnerSymbolDisplay}</span> Wins!`;
+                    } else {
+                        currentWinnerTextElement.textContent = `Winner: ${String(winner).toUpperCase()}`; 
+                    }
+                }
+            } else { currentWinnerTextElement.textContent = "Game ended."; }
+        } else { 
+            let playerSymbolToDisplay, playerColorToDisplay;
+            if (String(current_player).toLowerCase() === "o") {
+                playerSymbolToDisplay = PLAYER_SYMBOLS[0]; 
+                playerColorToDisplay = PLAYER_COLORS[0];   
+            } else if (String(current_player).toLowerCase() === "x") {
+                playerSymbolToDisplay = PLAYER_SYMBOLS[1]; 
+                playerColorToDisplay = PLAYER_COLORS[1];   
+            }
+            if (playerSymbolToDisplay) {
+                currentStatusTextElement.innerHTML = `Current Player: <span style="color: ${playerColorToDisplay}; font-weight: bold;">${playerSymbolToDisplay}</span>`;
+            } else {
+                currentStatusTextElement.textContent = "Waiting for player...";
+            }
+        }
+    }
+
+    // --- Main execution logic ---
+    if (!_ensureRendererElements(parent, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS)) {
+        if (parent && typeof parent.innerHTML !== 'undefined') {
+            parent.innerHTML = "<p style='color:red; font-family: sans-serif;'>Critical Error: Renderer element setup failed.</p>";
+        }
+        return;
+    }
+    
+    if (!environment || !environment.steps || !environment.steps[step]) {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS); 
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Initializing environment...";
+        return;
+    }
+
+    const currentStepAgents = environment.steps[step];
+    if (!currentStepAgents || !Array.isArray(currentStepAgents) || currentStepAgents.length === 0) {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Waiting for agent data...";
+        return;
+    }
+    
+    const gameMasterAgentIndex = currentStepAgents.length - 1;
+    const gameMasterAgent = currentStepAgents[gameMasterAgentIndex];
+
+    if (!gameMasterAgent || typeof gameMasterAgent.observation === 'undefined') {
+        _renderBoardDisplay_svg(null, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
+        if(currentStatusTextElement) currentStatusTextElement.textContent = "Waiting for observation data...";
+        return;
+    }
+    const observationForRenderer = gameMasterAgent.observation;
+
+    let gameSpecificState = null;
+
+    if (observationForRenderer && typeof observationForRenderer.observation_string === 'string' && observationForRenderer.observation_string.trim() !== '') {
+        try {
+            gameSpecificState = JSON.parse(observationForRenderer.observation_string);
+        } catch (e) {
+            _showMessage("Error: Corrupted game state (obs_string).", 'error');
+        }
+    }
+    
+    if (!gameSpecificState && observationForRenderer && typeof observationForRenderer.json === 'string' && observationForRenderer.json.trim() !== '') {
+        try {
+            gameSpecificState = JSON.parse(observationForRenderer.json);
+        } catch (e) {
+            _showMessage("Error: Corrupted game state (json).", 'error');
+        }
+    }
+    
+    if (!gameSpecificState && observationForRenderer && 
+        Array.isArray(observationForRenderer.board) && 
+        typeof observationForRenderer.current_player !== 'undefined'
+       ) {
+        if( (observationForRenderer.board.length === DEFAULT_NUM_ROWS &&
+             (observationForRenderer.board.length === 0 || 
+              (Array.isArray(observationForRenderer.board[0]) && observationForRenderer.board[0].length === DEFAULT_NUM_COLS)))
+          ){
+            gameSpecificState = observationForRenderer;
+        }
+    }
+    
+    _renderBoardDisplay_svg(gameSpecificState, DEFAULT_NUM_ROWS, DEFAULT_NUM_COLS);
+};
+
+
+    
+    </script>
+    <script>
+      const h = htm.bind(preact.h);
+      const { useContext, useEffect, useRef, useState } = preactHooks;
+      const styled = window.styled.default;
+
+      const Context = preact.createContext({});
+
+      const Loading = styled.div`
+        animation: rotate360 1.1s infinite linear;
+        border: 8px solid rgba(255, 255, 255, 0.2);
+        border-left-color: #0cb1ed;
+        border-radius: 50%;
+        height: 40px;
+        position: relative;
+        transform: translateZ(0);
+        width: 40px;
+
+        @keyframes rotate360 {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `;
+
+      const Logo = styled(
+        (props) => h`
+        <a href="https://kaggle.com" target="_blank" className=${props.className}>
+          <svg width="62px" height="20px" viewBox="0 0 62 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#1EBEFF" fill-rule="nonzero">
+              <path d="M10.2,17.8c0,0.1-0.1,0.1-0.2,0.1H7.7c-0.1,0-0.3-0.1-0.4-0.2l-3.8-4.9l-1.1,1v3.8 c0,0.2-0.1,0.3-0.3,0.3H0.3c-0.2,0-0.3-0.1-0.3-0.3V0.3C0.1,0.1,0.2,0,0.3,0h1.8c0.2,0,0.3,0.1,0.3,0.3V11L7,6.3 c0.1-0.1,0.2-0.2,0.4-0.2h2.4c0.1,0,0.2,0,0.2,0.1c0,0.1,0,0.2,0,0.2l-4.9,4.7l5.1,6.3C10.2,17.6,10.2,17.7,10.2,17.8z"/>
+              <path d="M19.6,17.9h-1.8c-0.2,0-0.3-0.1-0.3-0.3v-0.4c-0.8,0.6-1.8,0.9-3,0.9c-1.1,0-2-0.3-2.8-1 c-0.8-0.7-1.2-1.6-1.2-2.7c0-1.7,1.1-2.9,3.2-3.5c0.8-0.2,2.1-0.5,3.8-0.6c0.1-0.6-0.1-1.2-0.5-1.7c-0.4-0.5-1-0.7-1.7-0.7 c-1,0-2,0.4-3,1C12.2,9.1,12.1,9.1,12,9l-0.9-1.3C11,7.5,11,7.4,11.1,7.3c1.3-0.9,2.7-1.4,4.2-1.4c1.1,0,2.1,0.3,2.8,0.8 c1.1,0.8,1.7,2,1.7,3.7v7.3C19.9,17.8,19.8,17.9,19.6,17.9z M17.5,12.4c-1.7,0.2-2.9,0.4-3.5,0.7c-0.9,0.4-1.2,0.9-1.1,1.6 c0.1,0.4,0.2,0.7,0.6,0.9c0.3,0.2,0.7,0.4,1.1,0.4c1.2,0.1,2.2-0.2,2.9-1V12.4z"/>
+              <path d="M30.6,22.5c-0.9,1-2.3,1.5-4,1.5c-1,0-2-0.3-2.9-0.8c-0.2-0.1-0.4-0.3-0.7-0.5 c-0.3-0.2-0.6-0.5-0.9-0.7c-0.1-0.1-0.1-0.2,0-0.4l1.2-1.2c0.1-0.1,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2,0.1c1,1,1.9,1.5,2.8,1.5 c2.1,0,3.2-1.1,3.2-3.3v-1.4c-0.8,0.7-1.9,1-3.3,1c-1.7,0-3-0.6-4-1.9c-0.8-1.1-1.3-2.5-1.3-4.2c0-1.6,0.4-3,1.2-4.1 c0.9-1.3,2.3-2,4-2c1.3,0,2.4,0.3,3.3,1V6.4c0-0.2,0.1-0.3,0.3-0.3h1.8c0.2,0,0.3,0.1,0.3,0.3v11.7C32,20,31.5,21.5,30.6,22.5z M29.7,9.9c-0.4-1.1-1.4-1.7-3-1.7c-2,0-3.1,1.3-3.1,3.8c0,1.4,0.3,2.4,1,3.1c0.5,0.5,1.2,0.8,2,0.8c1.6,0,2.7-0.6,3.1-1.7V9.9z"/>
+              <path d="M42.9,22.5c-0.9,1-2.3,1.5-4,1.5c-1,0-2-0.3-2.9-0.8c-0.2-0.1-0.4-0.3-0.7-0.5 c-0.3-0.2-0.6-0.5-0.9-0.7c-0.1-0.1-0.1-0.2,0-0.4l1.2-1.2c0.1-0.1,0.1-0.1,0.2-0.1c0.1,0,0.1,0,0.2,0.1c1,1,1.9,1.5,2.8,1.5 c2.1,0,3.2-1.1,3.2-3.3v-1.4c-0.8,0.7-1.9,1-3.3,1c-1.7,0-3-0.6-4-1.9c-0.8-1.1-1.3-2.5-1.3-4.2c0-1.6,0.4-3,1.2-4.1 c0.9-1.3,2.3-2,4-2c1.3,0,2.4,0.3,3.3,1V6.4c0-0.2,0.1-0.3,0.3-0.3H44c0.2,0,0.3,0.1,0.3,0.3v11.7C44.3,20,43.8,21.5,42.9,22.5z M42,9.9c-0.4-1.1-1.4-1.7-3-1.7c-2,0-3.1,1.3-3.1,3.8c0,1.4,0.3,2.4,1,3.1c0.5,0.5,1.2,0.8,2,0.8c1.6,0,2.7-0.6,3.1-1.7L42,9.9 L42,9.9z"/>
+              <path d="M48.3,17.9h-1.8c-0.2,0-0.3-0.1-0.3-0.3V0.3c0-0.2,0.1-0.3,0.3-0.3h1.8c0.2,0,0.3,0.1,0.3,0.3 v17.3C48.5,17.8,48.5,17.9,48.3,17.9z"/>
+              <path d="M61.4,12.6c0,0.2-0.1,0.3-0.3,0.3h-8.5c0.1,0.9,0.5,1.6,1.1,2.2c0.7,0.6,1.6,0.9,2.7,0.9 c1,0,1.8-0.3,2.6-0.8c0.2-0.1,0.3-0.1,0.4,0l1.2,1.3c0.1,0.1,0.1,0.3,0,0.4c-1.3,0.9-2.7,1.4-4.4,1.4c-1.8,0-3.3-0.6-4.4-1.8 c-1.1-1.2-1.7-2.7-1.7-4.5c0-1.7,0.6-3.2,1.7-4.4c1-1.1,2.4-1.6,4.1-1.6c1.6,0,2.9,0.6,4,1.7c1.1,1.2,1.6,2.6,1.5,4.4L61.4,12.6 z M58,8.7c-0.6-0.5-1.3-0.8-2.1-0.8c-0.8,0-1.5,0.3-2.1,0.8c-0.6,0.5-1,1.2-1.1,2H59C59,9.9,58.6,9.3,58,8.7z"/>
+            </g>
+          </svg>
+        </a>
+      `
+      )`
+        display: inline-flex;
+      `;
+
+      const Header = styled((props) => {
+        const { environment } = useContext(Context);
+
+        return h`<div className=${props.className} >
+          <${Logo} />
+          <span><b>Left / Right Arrow:</b> Increase / Decrease Step</span><span><b>0-9 Row Keys:</b> Playback Speed</span><span><b>Space:</b> Pause / Play</span>
+          ${environment.title}
+        </div>`;
+      })`
+        align-items: center;
+        border-bottom: 4px solid #212121;
+        box-sizing: border-box;
+        color: #fff;
+        display: flex;
+        flex: 0 0 36px;
+        font-size: 14px;
+        justify-content: space-between;
+        padding: 0 8px;
+        width: 100%;
+      `;
+
+      const Renderer = styled((props) => {
+        const context = useContext(Context);
+        const { animate, debug, playing, renderer, speed } = context;
+        const ref = preact.createRef();
+
+        useEffect(async () => {
+          if (!ref.current) return;
+
+          const renderFrame = async (start, step, lastFrame) => {
+            if (step !== context.step) return;
+            if (lastFrame === 1) {
+              if (!animate) return;
+              start = Date.now();
+            }
+            const frame =
+              playing || animate
+                ? Math.min((Date.now() - start) / speed, 1)
+                : 1;
+            try {
+              if (debug) console.time("render");
+              await renderer({
+                ...context,
+                frame,
+                height: ref.current.clientHeight,
+                hooks: preactHooks,
+                parent: ref.current,
+                preact,
+                styled,
+                width: ref.current.clientWidth,
+              });
+            } catch (error) {
+              if (debug) console.error(error);
+              console.log({ ...context, frame, error });
+            } finally {
+              if (debug) console.timeEnd("render");
+            }
+            window.requestAnimationFrame(() => renderFrame(start, step, frame));
+          };
+
+          await renderFrame(Date.now(), context.step);
+        }, [ref.current, context.step, context.renderer]);
+
+        return h`<div className=${props.className} ref=${ref} />`;
+      })`
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        height: 100%;
+        left: 0;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        width: 100%;
+      `;
+
+      const Processing = styled((props) => {
+        const { processing } = useContext(Context);
+        const text = processing === true ? "Processing..." : processing;
+        return h`<div className=${props.className}>${text}</div>`;
+      })`
+        bottom: 0;
+        color: #fff;
+        font-size: 12px;
+        left: 0;
+        line-height: 24px;
+        position: absolute;
+        text-align: center;
+        width: 100%;
+      `;
+
+      const Viewer = styled((props) => {
+        const { processing } = useContext(Context);
+        return h`<div className=${props.className}>
+          <${Renderer} />
+          ${processing && h`<${Processing} />`}
+        </div>`;
+      })`
+        background-color: #000b2a;
+        background-image: radial-gradient(
+          circle closest-side,
+          #000b49,
+          #000b2a
+        );
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        width: 100%;
+      `;
+
+      // Partitions the elements of arr into subarrays of max length num.
+      const groupIntoSets = (arr, num) => {
+        const sets = [];
+        arr.forEach(a => {
+          if (sets.length === 0 || sets[sets.length - 1].length === num) {
+            sets.push([]);
+          }
+          sets[sets.length - 1].push(a);
+        });
+        return sets;
+      }
+
+      // Expects `width` input prop to set proper max-width for agent name span.
+      const Legend = styled((props) => {
+        const { agents, legend } = useContext(Context);
+
+        const agentPairs = groupIntoSets(agents.sort((a, b) => a.index - b.index), 2);
+
+        return h`<div className=${props.className}>
+          ${agentPairs.map(agentList =>
+            h`<ul>
+                ${agentList.map(a =>
+                  h`<li key=${a.id} title="id: ${a.id}" style="color:${a.color || "#FFF"}">
+                      ${a.image && h`<img src=${a.image} />`}
+                      <span>${a.name}</span>
+                    </li>`
+                )}
+              </ul>`)}
+        </div>`;
+      })`
+        background-color: #000b2a;
+        font-family: sans-serif;
+        font-size: 14px;
+        height: 48px;
+        width: 100%;
+
+        ul {
+          align-items: center;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+        }
+
+        li {
+          align-items: center;
+          display: inline-flex;
+          transition: color 1s;
+        }
+
+        span {
+          max-width: ${p => (p.width || 400) * 0.5 - 36}px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        img {
+          height: 24px;
+          margin-left: 4px;
+          margin-right: 4px;
+          width: 24px;
+        }
+      `;
+
+      const StepInput = styled.input.attrs({
+        type: "range",
+      })`
+        appearance: none;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+        display: block;
+        flex: 1;
+        height: 4px;
+        opacity: 0.8;
+        outline: none;
+        transition: opacity 0.2s;
+        width: 100%;
+
+        &:hover {
+          opacity: 1;
+        }
+
+        &::-webkit-slider-thumb {
+          appearance: none;
+          background: #1ebeff;
+          border-radius: 100%;
+          cursor: pointer;
+          height: 12px;
+          margin: 0;
+          position: relative;
+          width: 12px;
+
+          &::after {
+            content: "";
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 200px;
+            height: 8px;
+            background: green;
+          }
+        }
+      `;
+
+      const PlayButton = styled.button`
+        align-items: center;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        flex: 0 0 56px;
+        font-size: 20px;
+        height: 40px;
+        justify-content: center;
+        opacity: 0.8;
+        outline: none;
+        transition: opacity 0.2s;
+
+        &:hover {
+          opacity: 1;
+        }
+      `;
+
+      const StepCount = styled.span`
+        align-items: center;
+        color: white;
+        display: flex;
+        font-size: 14px;
+        justify-content: center;
+        opacity: 0.8;
+        padding: 0 16px;
+        pointer-events: none;
+      `;
+
+      const Controls = styled((props) => {
+        const { environment, pause, play, playing, setStep, step } = useContext(
+          Context
+        );
+        const value = step + 1;
+        const onClick = () => (playing ? pause() : play());
+        const onInput = (e) => {
+          pause();
+          setStep(parseInt(e.target.value) - 1);
+        };
+
+        return h`
+          <div className=${props.className}>
+            <${PlayButton} onClick=${onClick}><svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#FFFFFF">${
+          playing
+            ? h`<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/><path d="M0 0h24v24H0z" fill="none"/>`
+            : h`<path d="M8 5v14l11-7z"/><path d="M0 0h24v24H0z" fill="none"/>`
+        }</svg><//>
+            <${StepInput} min="1" max=${
+          environment.steps.length
+        } value="${value}" onInput=${onInput} />
+            <${StepCount}>${value} / ${environment.steps.length}<//>
+          </div>
+        `;
+      })`
+        align-items: center;
+        border-top: 4px solid #212121;
+        display: flex;
+        flex: 0 0 44px;
+        width: 100%;
+      `;
+
+      const Info = styled((props) => {
+        const {
+          environment,
+          playing,
+          step,
+          speed,
+          animate,
+          header,
+          controls,
+          settings,
+        } = useContext(Context);
+
+        return h`
+          <div className=${props.className}>
+            info:
+            step(${step}),
+            playing(${playing ? "T" : "F"}),
+            speed(${speed}),
+            animate(${animate ? "T" : "F"})
+          </div>`;
+      })`
+        color: #888;
+        font-family: monospace;
+        font-size: 12px;
+      `;
+
+      const Settings = styled((props) => {
+        const { environment, pause, play, playing, setStep, step } = useContext(
+          Context
+        );
+
+        return h`
+          <div className=${props.className}>
+            <${Info} />
+          </div>
+        `;
+      })`
+        background: #fff;
+        border-top: 4px solid #212121;
+        box-sizing: border-box;
+        padding: 20px;
+        width: 100%;
+
+        h1 {
+          font-size: 20px;
+        }
+      `;
+
+      const Player = styled((props) => {
+        const context = useContext(Context);
+        const { agents, controls, header, legend, loading, settings, width } = context;
+        return h`
+          <div className=${props.className}>
+            ${loading && h`<${Loading} />`}
+            ${!loading && header && h`<${Header} />`}
+            ${!loading && h`<${Viewer} />`}
+            ${!loading && legend && h`<${Legend} width=${width}/>`}
+            ${!loading && controls && h`<${Controls} />`}
+            ${!loading && settings && h`<${Settings} />`}
+          </div>`;
+      })`
+        align-items: center;
+        background: #212121;
+        border: 4px solid #212121;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+        position: relative;
+        width: 100%;
+      `;
+
+      const App = () => {
+        const renderCountRef = useRef(0);
+        const [_, setRenderCount] = useState(0);
+
+        // These are bindings to the 0-9 keys and are milliseconds of timeout per step
+        const speeds = [
+          0,
+          3000,
+          1000,
+          500,
+          333, // Default
+          200,
+          100,
+          50,
+          25,
+          10,
+        ];
+
+        const contextRef = useRef({
+          animate: false,
+          agents: [],
+          controls: false,
+          debug: false,
+          environment: { steps: [], info: {} },
+          header: window.innerHeight >= 600,
+          height: window.innerHeight,
+          interactive: false,
+          legend: true,
+          loading: false,
+          playing: false,
+          processing: false,
+          renderer: () => "DNE",
+          settings: false,
+          speed: speeds[4],
+          step: 0,
+          width: window.innerWidth,
+        });
+
+        // Context helpers.
+        const rerender = (contextRef.current.rerender = () =>
+          setRenderCount((renderCountRef.current += 1)));
+        const setStep = (contextRef.current.setStep = (newStep) => {
+          contextRef.current.step = newStep;
+          rerender();
+        });
+        const setPlaying = (contextRef.current.setPlaying = (playing) => {
+          contextRef.current.playing = playing;
+          rerender();
+        });
+        const pause = (contextRef.current.pause = () => setPlaying(false));
+
+        const playNext = () => {
+          const context = contextRef.current;
+
+          if (
+            context.playing &&
+            context.step < context.environment.steps.length - 1
+          ) {
+            setStep(context.step + 1);
+            play(true);
+          } else {
+            pause();
+          }
+        };
+
+        const play = (contextRef.current.play = (continuing) => {
+          const context = contextRef.current;
+          if (context.playing && !continuing) return;
+          if (!context.playing) setPlaying(true);
+          if (
+            !continuing &&
+            context.step === context.environment.steps.length - 1
+          ) {
+            setStep(0);
+          }
+          setTimeout(playNext, context.speed);
+        });
+
+        const updateContext = (o) => {
+          const context = contextRef.current;
+          Object.assign(context, o, {
+            environment: { ...context.environment, ...(o.environment || {}) },
+          });
+          rerender();
+        };
+
+        // First time setup.
+        useEffect(() => {
+          // Timeout is used to ensure useEffect renders once.
+          setTimeout(() => {
+            // Initialize context with window.kaggle.
+            updateContext(window.kaggle || {});
+
+            if (window.kaggle.playing) {
+                play(true);
+            }
+
+            // Listen for messages received to update the context.
+            window.addEventListener(
+              "message",
+              (event) => {
+                // Ensure the environment names match before updating.
+                try {
+                  if (
+                    event.data.environment.name ==
+                    contextRef.current.environment.name
+                  ) {
+                    updateContext(event.data);
+                  }
+                } catch {}
+              },
+              false
+            );
+            // Listen for keyboard commands.
+            window.addEventListener(
+              "keydown",
+              (event) => {
+                const {
+                  interactive,
+                  isInteractive,
+                  playing,
+                  step,
+                  environment,
+                } = contextRef.current;
+                const key = event.keyCode;
+                const zero_key = 48
+                const nine_key = 57
+                if (
+                  interactive ||
+                  isInteractive() ||
+                  (key !== 32 && key !== 37 && key !== 39 && !(key >= zero_key && key <= nine_key))
+                )
+                  return;
+
+                if (key === 32) {
+                  playing ? pause() : play();
+                } else if (key === 39) {
+                  contextRef.current.playing = false;
+                  if (step < environment.steps.length - 1) setStep(step + 1);
+                  rerender();
+                } else if (key === 37) {
+                  contextRef.current.playing = false;
+                  if (step > 0) setStep(step - 1);
+                  rerender();
+                } else if (key >= zero_key && key <= nine_key) {
+                  contextRef.current.speed = speeds[key - zero_key];
+                }
+                event.preventDefault();
+                return false;
+              },
+              false
+            );
+          }, 1);
+        }, []);
+
+        if (contextRef.current.debug) {
+          console.log("context", contextRef.current);
+        }
+
+        // Ability to update context.
+        contextRef.current.update = updateContext;
+
+        // Ability to communicate with ipython.
+        const execute = (contextRef.current.execute = (source) =>
+          new Promise((resolve, reject) => {
+            try {
+              window.parent.IPython.notebook.kernel.execute(source, {
+                iopub: {
+                  output: (resp) => {
+                    const type = resp.msg_type;
+                    if (type === "stream") return resolve(resp.content.text);
+                    if (type === "error") return reject(new Error(resp.evalue));
+                    return reject(new Error("Unknown message type: " + type));
+                  },
+                },
+              });
+            } catch (e) {
+              reject(new Error("IPython Unavailable: " + e));
+            }
+          }));
+
+        // Ability to return an action from an interactive session.
+        contextRef.current.act = (action) => {
+          const id = contextRef.current.environment.id;
+          updateContext({ processing: true });
+          execute(`
+            import json
+            from kaggle_environments import interactives
+            if "${id}" in interactives:
+                action = json.loads('${JSON.stringify(action)}')
+                env, trainer = interactives["${id}"]
+                trainer.step(action)
+                print(json.dumps(env.steps))`)
+            .then((resp) => {
+              try {
+                updateContext({
+                  processing: false,
+                  environment: { steps: JSON.parse(resp) },
+                });
+                play();
+              } catch (e) {
+                updateContext({ processing: resp.split("\n")[0] });
+                console.error(resp, e);
+              }
+            })
+            .catch((e) => console.error(e));
+        };
+
+        // Check if currently interactive.
+        contextRef.current.isInteractive = () => {
+          const context = contextRef.current;
+          const steps = context.environment.steps;
+          return (
+            context.interactive &&
+            !context.processing &&
+            context.step === steps.length - 1 &&
+            steps[context.step].some((s) => s.status === "ACTIVE")
+          );
+        };
+
+        return h`
+          <${Context.Provider} value=${contextRef.current}>
+            <${Player} />
+          <//>`;
+      };
+
+      preact.render(h`<${App} />`, document.body);
+    </script>
+  </body>
+</html>
