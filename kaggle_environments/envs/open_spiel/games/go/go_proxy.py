@@ -20,20 +20,6 @@ class GoState(proxy.State):
     else:
       raise ValueError(f'Invalid player: {player}')
 
-
-#{
-#  "board_size": 9,
-#  "komi": 7.5,
-#  "current_player_to_move": "B",
-#  "move_number": 1,
-#  "previous_move_a1": null,
-#  "board_grid": [
-#    [ {"A9": "."}, {"B9": "."}, /* ..., */ {"J9": "."} ],
-#    [ {"A8": "."}, {"B8": "."}, /* ..., */ {"J8": "."} ],
-#    /* ... more rows ... */
-#    [ {"A1": "."}, {"B1": "."}, /* ..., */ {"J1": "."} ]
-#  ]
-#}
   def _board_string_to_dict(self, board_string: str) -> dict:
     lines = board_string.strip().splitlines()
     if len(lines) < 3:
@@ -70,7 +56,6 @@ class GoState(proxy.State):
     return grid
 
   def state_dict(self) -> dict[str, Any]:
-    #clone_state = self.__wrapped__.get_game().__wrapped__.new_initial_state()
     clone_state = self.get_game().__wrapped__.new_initial_state()
     action_strs = []
     for action in self.history():
@@ -79,10 +64,8 @@ class GoState(proxy.State):
     prev_move = None if not action_strs else action_strs[-1]
 
     return {
-        #'board_size': self.__wrapped__.get_game().get_parameters()['board_size'],
-        #'komi': self.__wrapped__.get_game().get_parameters()['komi'],
-        'board_size': 19,
-        'komi': 7.5,
+        'board_size': self.get_game().get_parameters()['board_size'],
+        'komi': self.get_game().get_parameters()['komi'],
         'current_player_to_move': self._player_string(self.current_player()),
         'move_number': len(self.history()) + 1,
         'previous_move_a1': prev_move,
@@ -91,19 +74,6 @@ class GoState(proxy.State):
 
   def to_json(self) -> str:
     return json.dumps(self.state_dict())
-
-  #def action_to_dict(self, action: int) -> dict[str, Any]:
-  #  return {'col': action}
-
-  #def action_to_json(self, action: int) -> str:
-  #  return json.dumps(self.action_to_dict(action))
-
-  #def dict_to_action(self, action_dict: dict[str, Any]) -> int:
-  #  return int(action_dict['col'])
-
-  #def json_to_action(self, action_json: str) -> int:
-  #  action_dict = json.loads(action_json)
-  #  return self.dict_to_action(action_dict)
 
   def observation_string(self, player: int) -> str:
     return self.observation_json(player)

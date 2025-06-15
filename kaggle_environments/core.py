@@ -98,7 +98,6 @@ def make(environment, configuration=None, info=None, steps=None, logs=None, debu
     if logs is None:
         logs = []
 
-
     if has(environment, str) and has(environments, dict, path=[environment]):
         return Environment(**environments[environment], configuration=configuration, info=info, steps=steps, logs=logs, debug=debug, state=state)
     elif callable(environment):

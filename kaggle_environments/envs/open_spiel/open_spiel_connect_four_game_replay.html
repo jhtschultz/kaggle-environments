@@ -60,18 +60,18 @@ window.kaggle = {
   "step": 0,
   "controls": true,
   "environment": {
-    "id": "f5046fde-4959-11f0-82b7-ea921b189151",
+    "id": "e0d0d69a-4a23-11f0-bd6e-ea921b189151",
     "name": "open_spiel_connect_four",
     "title": "Open Spiel: connect_four",
     "description": "Kaggle environment wrapper for OpenSpiel games.\nFor game implementation details see:\nhttps://github.com/google-deepmind/open_spiel/tree/master/open_spiel/games",
     "version": "0.1.0",
     "configuration": {
-      "openSpielGameParameters": {},
       "episodeSteps": 142,
       "actTimeout": 5,
       "runTimeout": 1200,
       "openSpielGameString": "connect_four_proxy()",
-      "openSpielGameName": "connect_four"
+      "openSpielGameName": "connect_four",
+      "openSpielGameParameters": {}
     },
     "specification": {
       "action": {
@@ -152,24 +152,24 @@ window.kaggle = {
             "type": "string"
           },
           "legal_actions": {
-            "description": "List of OpenSpiel legal actions.",
+            "description": "List of OpenSpiel legal action integers.",
             "type": "array"
           },
-          "chance_outcome_probs": {
-            "description": "List of probabilities for chance outcomes.",
+          "legal_action_strings": {
+            "description": "List of OpenSpiel legal actions strings.",
             "type": "array"
           },
           "current_player": {
             "description": "ID of player whose turn it is.",
             "type": "integer"
           },
-          "is_terminal": {
-            "description": "Boolean indicating game end.",
-            "type": "boolean"
-          },
           "player_id": {
             "description": "ID of the agent receiving this observation.",
             "type": "integer"
+          },
+          "is_terminal": {
+            "description": "Boolean indicating game end.",
+            "type": "boolean"
           },
           "remainingOverageTime": 60,
           "step": 0
@@ -209,8 +209,11 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
-          "info": {},
+          "reward": null,
+          "info": {
+            "action_submitted": null,
+            "action_applied": null
+          },
           "observation": {
             "remainingOverageTime": 12,
             "step": 1,
@@ -224,6 +227,15 @@ window.kaggle = {
               5,
               6
             ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 0
@@ -232,12 +244,13 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
             "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -247,16 +260,18 @@ window.kaggle = {
       ],
       [
         {
-          "action": 2,
-          "reward": 0.0,
+          "action": 6,
+          "reward": null,
           "info": {
-            "action_applied": 2
+            "action_submitted": 6,
+            "action_applied": 6
           },
           "observation": {
             "remainingOverageTime": 12,
             "step": 2,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 1,
             "is_terminal": false,
             "player_id": 0
@@ -265,11 +280,11 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -278,6 +293,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -289,12 +313,12 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
             "step": 3,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -303,6 +327,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
             ],
             "current_player": 0,
             "is_terminal": false,
@@ -312,14 +345,16 @@ window.kaggle = {
         },
         {
           "action": 4,
-          "reward": 0.0,
+          "reward": null,
           "info": {
+            "action_submitted": 4,
             "action_applied": 4
           },
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \".\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -330,15 +365,17 @@ window.kaggle = {
       [
         {
           "action": 3,
-          "reward": 0.0,
+          "reward": null,
           "info": {
+            "action_submitted": 3,
             "action_applied": 3
           },
           "observation": {
             "remainingOverageTime": 12,
             "step": 4,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 1,
             "is_terminal": false,
             "player_id": 0
@@ -347,11 +384,11 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -360,6 +397,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -371,12 +417,12 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
             "step": 5,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -386,6 +432,15 @@ window.kaggle = {
               5,
               6
             ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 0
@@ -394,14 +449,16 @@ window.kaggle = {
         },
         {
           "action": 5,
-          "reward": 0.0,
+          "reward": null,
           "info": {
+            "action_submitted": 5,
             "action_applied": 5
           },
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -411,16 +468,18 @@ window.kaggle = {
       ],
       [
         {
-          "action": 0,
-          "reward": 0.0,
+          "action": 2,
+          "reward": null,
           "info": {
-            "action_applied": 0
+            "action_submitted": 2,
+            "action_applied": 2
           },
           "observation": {
             "remainingOverageTime": 12,
             "step": 6,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 1,
             "is_terminal": false,
             "player_id": 0
@@ -429,11 +488,11 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -442,6 +501,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -453,12 +521,12 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
             "step": 7,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -468,6 +536,15 @@ window.kaggle = {
               5,
               6
             ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 0
@@ -475,15 +552,121 @@ window.kaggle = {
           "status": "ACTIVE"
         },
         {
-          "action": 5,
-          "reward": 0.0,
+          "action": 4,
+          "reward": null,
           "info": {
-            "action_applied": 5
+            "action_submitted": 4,
+            "action_applied": 4
           },
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 3,
+          "reward": null,
+          "info": {
+            "action_submitted": 3,
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 8,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "legal_action_strings": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": null,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": null,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 9,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 4,
+          "reward": null,
+          "info": {
+            "action_submitted": 4,
+            "action_applied": 4
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -494,15 +677,17 @@ window.kaggle = {
       [
         {
           "action": 0,
-          "reward": 0.0,
+          "reward": null,
           "info": {
+            "action_submitted": 0,
             "action_applied": 0
           },
           "observation": {
             "remainingOverageTime": 12,
-            "step": 8,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "step": 10,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 1,
             "is_terminal": false,
             "player_id": 0
@@ -511,11 +696,11 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -524,6 +709,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -535,12 +729,12 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "step": 9,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "step": 11,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -550,6 +744,15 @@ window.kaggle = {
               5,
               6
             ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 0
@@ -557,15 +760,121 @@ window.kaggle = {
           "status": "ACTIVE"
         },
         {
-          "action": 6,
-          "reward": 0.0,
+          "action": 2,
+          "reward": null,
           "info": {
-            "action_applied": 6
+            "action_submitted": 2,
+            "action_applied": 2
           },
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "INACTIVE"
+        }
+      ],
+      [
+        {
+          "action": 3,
+          "reward": null,
+          "info": {
+            "action_submitted": 3,
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "legal_action_strings": [],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "INACTIVE"
+        },
+        {
+          "action": -1,
+          "reward": null,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
+            ],
+            "current_player": 1,
+            "is_terminal": false,
+            "player_id": 1
+          },
+          "status": "ACTIVE"
+        }
+      ],
+      [
+        {
+          "action": -1,
+          "reward": null,
+          "info": {},
+          "observation": {
+            "remainingOverageTime": 12,
+            "step": 13,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
+            "current_player": 0,
+            "is_terminal": false,
+            "player_id": 0
+          },
+          "status": "ACTIVE"
+        },
+        {
+          "action": 3,
+          "reward": null,
+          "info": {
+            "action_submitted": 3,
+            "action_applied": 3
+          },
+          "observation": {
+            "remainingOverageTime": 12,
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -576,179 +885,17 @@ window.kaggle = {
       [
         {
           "action": 4,
-          "reward": 0.0,
+          "reward": null,
           "info": {
+            "action_submitted": 4,
             "action_applied": 4
           },
           "observation": {
             "remainingOverageTime": 12,
-            "step": 10,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 11,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "action": 1,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 1
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "action": 3,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 3
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 13,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "action": 6,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 6
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \".\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "action": 1,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 1
-          },
-          "observation": {
-            "remainingOverageTime": 12,
             "step": 14,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 1,
             "is_terminal": false,
             "player_id": 0
@@ -757,11 +904,11 @@ window.kaggle = {
         },
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \".\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -770,6 +917,15 @@ window.kaggle = {
               4,
               5,
               6
+            ],
+            "legal_action_strings": [
+              "o0",
+              "o1",
+              "o2",
+              "o3",
+              "o4",
+              "o5",
+              "o6"
             ],
             "current_player": 1,
             "is_terminal": false,
@@ -781,12 +937,12 @@ window.kaggle = {
       [
         {
           "action": -1,
-          "reward": 0.0,
+          "reward": null,
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
             "step": 15,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [
               0,
               1,
@@ -796,6 +952,15 @@ window.kaggle = {
               5,
               6
             ],
+            "legal_action_strings": [
+              "x0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "x5",
+              "x6"
+            ],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 0
@@ -803,15 +968,17 @@ window.kaggle = {
           "status": "ACTIVE"
         },
         {
-          "action": 2,
-          "reward": 0.0,
+          "action": 0,
+          "reward": null,
           "info": {
-            "action_applied": 2
+            "action_submitted": 0,
+            "action_applied": 0
           },
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": 0,
             "is_terminal": false,
             "player_id": 1
@@ -821,180 +988,18 @@ window.kaggle = {
       ],
       [
         {
-          "action": 0,
-          "reward": 0.0,
+          "action": 1,
+          "reward": 1.0,
           "info": {
-            "action_applied": 0
+            "action_submitted": 1,
+            "action_applied": 1
           },
           "observation": {
             "remainingOverageTime": 12,
             "step": 16,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+            "observation_string": "{\"board\": [[\"x\", \"x\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
             "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 17,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "action": 3,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 3
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "action": 5,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 5
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 18,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "INACTIVE"
-        },
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \".\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 1,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "ACTIVE"
-        }
-      ],
-      [
-        {
-          "action": -1,
-          "reward": 0.0,
-          "info": {},
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 19,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6
-            ],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 0
-          },
-          "status": "ACTIVE"
-        },
-        {
-          "action": 2,
-          "reward": 0.0,
-          "info": {
-            "action_applied": 2
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
-            "legal_actions": [],
-            "current_player": 0,
-            "is_terminal": false,
-            "player_id": 1
-          },
-          "status": "INACTIVE"
-        }
-      ],
-      [
-        {
-          "action": 0,
-          "reward": 1.0,
-          "info": {
-            "action_applied": 0
-          },
-          "observation": {
-            "remainingOverageTime": 12,
-            "step": 20,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
-            "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": -4,
             "is_terminal": true,
             "player_id": 0
@@ -1007,8 +1012,9 @@ window.kaggle = {
           "info": {},
           "observation": {
             "remainingOverageTime": 12,
-            "observation_string": "{\"board\": [[\"x\", \"o\", \"x\", \"x\", \"o\", \"o\", \"o\"], [\"x\", \"x\", \"o\", \"x\", \"x\", \"o\", \"o\"], [\"x\", \".\", \"o\", \"o\", \".\", \"x\", \".\"], [\"x\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
+            "observation_string": "{\"board\": [[\"x\", \"x\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}",
             "legal_actions": [],
+            "legal_action_strings": [],
             "current_player": -4,
             "is_terminal": true,
             "player_id": 1
@@ -1026,14 +1032,50 @@ window.kaggle = {
       "DONE"
     ],
     "schema_version": 1,
-    "info": {}
+    "info": {
+      "state_history": [
+        "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \".\", \".\", \".\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \".\", \".\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \".\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \".\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\".\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\".\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"o\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \".\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"x\", \"is_terminal\": false, \"winner\": null}",
+        "{\"board\": [[\"x\", \"x\", \"x\", \"x\", \"o\", \"o\", \"x\"], [\"o\", \".\", \"o\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"x\", \"o\", \".\", \".\"], [\".\", \".\", \".\", \"o\", \"x\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"], [\".\", \".\", \".\", \".\", \".\", \".\", \".\"]], \"current_player\": \"terminal\", \"is_terminal\": true, \"winner\": \"x\"}"
+      ],
+      "action_history": [
+        "6",
+        "4",
+        "3",
+        "5",
+        "2",
+        "4",
+        "3",
+        "4",
+        "0",
+        "2",
+        "3",
+        "3",
+        "4",
+        "0",
+        "1"
+      ]
+    }
   },
   "logs": [
     [],
     [],
     [
       {
-        "duration": 7e-06,
+        "duration": 5e-06,
         "stdout": "",
         "stderr": ""
       },
@@ -1045,7 +1087,7 @@ window.kaggle = {
     ],
     [
       {
-        "duration": 2.8e-05,
+        "duration": 9e-06,
         "stdout": "",
         "stderr": ""
       },
@@ -1054,7 +1096,39 @@ window.kaggle = {
     [
       {},
       {
-        "duration": 9e-06,
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    [
+      {
+        "duration": 7e-06,
+        "stdout": "",
+        "stderr": ""
+      },
+      {}
+    ],
+    [
+      {},
+      {
+        "duration": 8e-06,
         "stdout": "",
         "stderr": ""
       }
@@ -1070,62 +1144,14 @@ window.kaggle = {
     [
       {},
       {
-        "duration": 7e-06,
+        "duration": 6e-06,
         "stdout": "",
         "stderr": ""
       }
     ],
     [
-      {
-        "duration": 7e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {}
-    ],
-    [
-      {},
-      {
-        "duration": 9e-06,
-        "stdout": "",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 7e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {}
-    ],
-    [
-      {},
       {
         "duration": 5e-06,
-        "stdout": "",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 6e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {}
-    ],
-    [
-      {},
-      {
-        "duration": 6e-06,
-        "stdout": "",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 6e-06,
         "stdout": "",
         "stderr": ""
       },
@@ -1150,22 +1176,6 @@ window.kaggle = {
     [
       {},
       {
-        "duration": 6e-06,
-        "stdout": "",
-        "stderr": ""
-      }
-    ],
-    [
-      {
-        "duration": 6e-06,
-        "stdout": "",
-        "stderr": ""
-      },
-      {}
-    ],
-    [
-      {},
-      {
         "duration": 5e-06,
         "stdout": "",
         "stderr": ""
@@ -1173,7 +1183,7 @@ window.kaggle = {
     ],
     [
       {
-        "duration": 6e-06,
+        "duration": 5e-06,
         "stdout": "",
         "stderr": ""
       },
